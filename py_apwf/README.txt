@@ -2,12 +2,12 @@ These scripts were planned to be used to implement (and improve) the
 (quite elaborated) workflow previously used with Lightroom.
 
 
+*** ilg.apwf.checkTimeZones ***
 
-*** ilg.apfw.dumpMetadata ***
+Applies to: the multiple selected photos.
 
-Applies to: a single selected photo.
-
-Dump all available metadata.
+Check if the time zones of the selected photos are properly set,
+to allow further processing.
 
 
 *** ilg.apfw.makeGpsReference ***
@@ -54,14 +54,6 @@ The master file name cannot be changed by writing the 'FileName' other tag,
 it requires a Batch Change rename.
 
 
-*** ilg.apfw.dumpTimeZones ***
-
-Applies to: the multiple selected photos.
-
-Print the 'cameraTimeZoneName' and 'pictureTimeZoneName' custom tags, 
-if present.
-
-
 *** ilg.apfw.geotag ***
 
 >>> TO BE IMPLEMENTED
@@ -73,6 +65,25 @@ Altitude.
 
 The first version will use a local gpx file, but future versions may 
 access the myTrack data.
+
+
+-------------------------------------------------------------------------------
+
+*** ilg.apfw.dumpMetadata ***
+
+Applies to: a single selected photo.
+
+Dump all available metadata.
+
+
+
+*** ilg.apfw.dumpTimeZones ***
+
+Applies to: the multiple selected photos.
+
+Print the 'cameraTimeZoneName' and 'pictureTimeZoneName' custom tags, 
+if present.
+
 
 
 
