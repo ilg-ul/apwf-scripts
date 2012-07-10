@@ -1,5 +1,5 @@
 
-from datetime import datetime, timedelta, tzinfo
+from datetime import timedelta, tzinfo
 
 class GmtTzinfo(tzinfo):
     
@@ -19,6 +19,8 @@ class GmtTzinfo(tzinfo):
         self.offsetMinutes = minutes
         self.stringTimeZone = stringTimeZone
 
+        return
+    
         
     def utcoffset(self, dt):
         
