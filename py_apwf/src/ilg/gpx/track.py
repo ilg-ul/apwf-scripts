@@ -11,7 +11,13 @@ class TrackByTimestamp(object):
     def __init__(self):
 
         self.points = []
+        self.name = None
         
+        return
+    
+    
+    def setName(self, name):
+        self.name = name
         return
     
     
