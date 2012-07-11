@@ -31,3 +31,10 @@ class NotFoundBetween(NotFound):
     def __str__(self):
         
         return str(self.indexBefore)
+    
+
+    def getIndexBefore(self):
+        
+        return self.indexBefore
+    
+    
