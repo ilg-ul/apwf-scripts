@@ -6,9 +6,9 @@ if __name__ == '__main__':
     file_name = '/Users/ilg/Desktop/g.gpx'
     
     if False:
-        file = open( file_name, 'r' )
-        gpx_xml = file.read()
-        file.close()
+        f = open( file_name, 'r' )
+        gpx_xml = f.read()
+        f.close()
     else:
         th = TrackHandler()
         parser = make_parser()
