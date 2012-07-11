@@ -67,7 +67,7 @@ The first version will use a local gpx file, but future versions may
 access the myTrack data.
 
 
--------------------------------------------------------------------------------
+----- Development tools -------------------------------------------------------
 
 *** ilg.apfw.dumpMetadata ***
 

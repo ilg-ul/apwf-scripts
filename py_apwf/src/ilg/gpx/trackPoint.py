@@ -9,19 +9,12 @@ class TrackPoint(object):
         self.latitude = float(latitude)
         self.longitude = float(longitude)
         
-        if elevation == None:
-            self.elevation = elevation
-        else:
-            self.elevation = float(elevation)
+        self.setElevation(elevation)
         
         self.tzUtc = ZuluTzinfo()
 
-        if timestamp == None:
-            self.timestamp = None
-        else:
-            self.timestamp = self._convertStringToDate(timestamp)
-        
-        
+        self.setTimestamp(timestamp)
+              
         return
     
     
@@ -39,8 +32,10 @@ class TrackPoint(object):
         
         if timestampString == None:
             self.timestamp = None
+        elif isinstance(timestampString, unicode):
+            self.timestamp = self._convertStringToDate(timestampString)
         else:
-            self.timestamp = self._convertStringToDate(timestampString)   
+            self.timestamp = timestampString
                 
         return
     
@@ -57,4 +52,38 @@ class TrackPoint(object):
         return timestampWithTz
     
 
+class InterpolatedTrackPoint(TrackPoint):
+
+    def __init__(self, timestamp, trackPointBefore, trackPointAfter):
+        
+        timestampBefore = trackPointBefore.timestamp
+        timestampAfter = trackPointAfter.timestamp
+        ratio = (float((timestamp-timestampBefore).total_seconds())/
+                     float((timestampAfter-timestampBefore).total_seconds()))
+        
+        latitudeBefore = trackPointBefore.latitude
+        latitudeAfter = trackPointAfter.latitude
+        
+        latitude = latitudeBefore + (latitudeAfter - latitudeBefore) * ratio
+        
+        longitudeBefore = trackPointBefore.longitude
+        longitudeAfter = trackPointAfter.longitude
+        
+        longitude = longitudeBefore + (longitudeAfter - longitudeBefore) * ratio
+       
+        elevationBefore = trackPointBefore.elevation
+        elevationAfter = trackPointAfter.elevation
+        
+        elevation = elevationBefore + (elevationAfter - elevationBefore) * ratio
+        
+        super(InterpolatedTrackPoint,self).__init__(latitude, longitude, elevation, timestamp)
+        
+        self.ratio = ratio
+        self.trackPointBefore = trackPointBefore
+        self.trackPointAfter = trackPointAfter
+        
+        return
     
+
+        
+

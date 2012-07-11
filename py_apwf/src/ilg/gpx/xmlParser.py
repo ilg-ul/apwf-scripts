@@ -1,6 +1,7 @@
 
 from xml.sax.handler import ContentHandler
 
+from ilg.gpx.track import Tracks
 from ilg.gpx.track import TrackByTimestamp
 from ilg.gpx.trackPoint import TrackPoint
 
@@ -12,11 +13,16 @@ class TrackHandler(ContentHandler):
         self.innerHandler = _Ignore()
         
         # empty list of tracks
-        self.tracks = []
+        self.tracks = Tracks()
         
         return
 
+      
+    def getResult(self):
         
+        return self.tracks;
+    
+      
     def startElement(self, name, attributes):
         
         if self.inGpx:

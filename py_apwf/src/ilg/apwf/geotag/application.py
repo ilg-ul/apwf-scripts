@@ -22,7 +22,12 @@ import pytz
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.aperture import Aperture
 
+from ilg.gpx.trackPoint import InterpolatedTrackPoint
+
 from appscript import k
+
+from xml.sax import make_parser
+from ilg.gpx.xmlParser import TrackHandler
 
 
 class Application():
@@ -37,6 +42,8 @@ class Application():
         
         # application specific members
         self.photos = None
+        
+        self.tracks = None
         
 
     def usage(self):
@@ -90,6 +97,8 @@ class Application():
 
         self.getMultipleSelection()        
         
+        self.parseGpx()
+        
         self.geotag()
         
         return
@@ -104,6 +113,32 @@ class Application():
         return
     
 
+    def parseGpx(self):
+
+        file_name = '/Users/ilg/Desktop/g.gpx'
+
+        print "Parsing track file '{0}'... ".format(file_name)
+        
+        th = TrackHandler()
+        parser = make_parser()
+        parser.setContentHandler(th)
+        parser.parse(file_name)
+
+        # get the list of tracks
+        self.gpxTracks = th.getResult()
+        tracks = self.gpxTracks.getTracks()
+        for track in tracks:
+            name = track.getName()
+            points = track.getPoints()
+            count = len(points)
+            firstPointTimestamp = points[0].timestamp
+            lastPointTimestamp = points[count-1].timestamp
+            print ("  Track '{0}', {1} points, from '{2}' to '{3}'".format(
+                name, count, firstPointTimestamp, lastPointTimestamp))
+            
+        return
+    
+    
     def geotag(self):
         
         print 'Geotagging photos... '
@@ -124,7 +159,23 @@ class Application():
                        format(photoName, photoExifDate, latitude, latitude))
                 continue
             
-            print ("  '{0}' from '{1}' not geotagged".
+            trackPoint = self.gpxTracks.locateByTimestamp(photoExifDateUtc)
+            if trackPoint != None:
+                
+                latitude = trackPoint.latitude
+                longitude = trackPoint.longitude
+                elevation = trackPoint.elevation
+    
+                if isinstance(trackPoint, InterpolatedTrackPoint):
+                    kind = 'interpolated'
+                else:
+                    kind = ''
+                    
+                print ("  '{0}' from '{1}' geotagged, lat={2}, lon={3}, alt={4} {5}".
+                           format(photoName, photoExifDate, latitude, longitude, 
+                                  elevation, kind))
+            else:
+                print ("  '{0}' from '{1}' not geotagged".
                        format(photoName, photoExifDate))
             
                 
