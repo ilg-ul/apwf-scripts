@@ -6,15 +6,23 @@ class GmtTzinfo(tzinfo):
     def __init__(self, stringTimeZone):
         
         # initialise parent tzinfo
-        super(self.__class__,self).__init__()
+        super(GmtTzinfo,self).__init__()
         
         stringTimeZone = stringTimeZone.strip()
-        ix = 0
-        signCh = stringTimeZone[ix:ix+1]
-        splits = stringTimeZone[ix+1:].split(':')
-        minutes = int(splits[0])*60 + int(splits[1])
-        if signCh == '-':
-            minutes = -minutes
+        
+        if stringTimeZone != 'Z':
+            
+            ix = 0
+            signCh = stringTimeZone[ix:ix+1]
+            splits = stringTimeZone[ix+1:].split(':')
+            minutes = int(splits[0])*60 + int(splits[1])
+            if signCh == '-':
+                minutes = -minutes
+                
+        else:
+           
+            minutes = 0 
+            
         
         self.offsetMinutes = minutes
         self.stringTimeZone = stringTimeZone
@@ -52,3 +60,17 @@ class GmtTzinfo(tzinfo):
         
         return repr(self.stringTimeZone)
     
+
+# A simple Zulu time zone
+
+class ZuluTzinfo(GmtTzinfo):
+
+    def __init__(self):
+            
+        super(ZuluTzinfo,self).__init__('Z')
+
+        return
+    
+    # All other methods inherited from parent
+    
+
