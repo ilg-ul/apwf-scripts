@@ -271,6 +271,105 @@ class Aperture():
         return newGpsInterpolatedReferenceDateString
 
 
+    # return float
+    def getCustomAltitude(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        altitudeString = self.getItemByName(custom_tags, 'Altitude')
+        
+        return float(altitudeString)
+
+
+    def setCustomAltitude(self, photo, altitudeFloat):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        altitudeString = str(altitudeFloat)
+        self.setItemByName(custom_tags, 'Altitude', altitudeString)
+
+        return altitudeString
+
+
+    def addCustomAltitude(self, photo, altitudeFloat):
+                
+        altitudeString = str(altitudeFloat)
+    
+        self.makeTag(photo, k.custom_tag, 'Altitude', altitudeString)
+
+        return altitudeString
+    
+
+    # return float
+    def getGeotagInterpolateIntervalSeconds(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        intervalString = self.getItemByName(custom_tags, 'GeotagInterpolateIntervalSeconds')
+        
+        return float(intervalString)
+
+
+    def setGeotagInterpolateIntervalSeconds(self, photo, intervalFloat):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        intervalString = str(intervalFloat)
+        self.setItemByName(custom_tags, 'GeotagInterpolateIntervalSeconds', intervalString)
+
+        return intervalString
+
+
+    def addGeotagInterpolateIntervalSeconds(self, photo, intervalFloat):
+                
+        intervalString = str(intervalFloat)
+    
+        self.makeTag(photo, k.custom_tag, 'GeotagInterpolateIntervalSeconds', intervalString)
+
+        return intervalString
+    
+
+    # return float
+    def getGeotagInterpolateRatio(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        ratioString = self.getItemByName(custom_tags, 'GeotagInterpolateRatio')
+        
+        return float(ratioString)
+
+
+    def setGeotagInterpolateRatio(self, photo, ratioFloat):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        ratioString = str(ratioFloat)
+        self.setItemByName(custom_tags, 'GeotagInterpolateRatio', ratioString)
+
+        return ratioString
+
+
+    def addGeotagInterpolateRatio(self, photo, ratioFloat):
+                
+        ratioString = str(ratioFloat)
+    
+        self.makeTag(photo, k.custom_tag, 'GeotagInterpolateRatio', ratioString)
+
+        return ratioString
+
+
+    def setLatitude(self, photo, latitudeFloat):
+        
+        photo.latitude.set(latitudeFloat)
+        return
+    
+ 
+    def setLongitude(self, photo, longitudeFloat):
+        
+        photo.longitude.set(longitudeFloat)
+        return
+    
+       
     def makeTag(self, photo, tagType, tagName, tagValue):
 
         photo.make(new=tagType, with_properties={k.name: tagName, 
@@ -294,7 +393,7 @@ class Aperture():
                 tz = GmtTzinfo(timeZoneName)
             except ValueError as err:
                 print err
-                raise ErrorWithDescription("Unknown  time zone '{0}'".
+                raise ErrorWithDescription("Unknown time zone '{0}'".
                                            format(timeZoneName))
     
             stringDate = inStringDate[0:ix].strip()
