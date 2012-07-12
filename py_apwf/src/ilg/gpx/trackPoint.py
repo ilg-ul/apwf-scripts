@@ -1,4 +1,5 @@
 
+import math
 from datetime import datetime
 from ilg.apwf.gmtTzinfo import ZuluTzinfo
 
@@ -52,14 +53,18 @@ class TrackPoint(object):
         return timestampWithTz
     
 
+# -----------------------------------------------------------------------------
+
 class InterpolatedTrackPoint(TrackPoint):
 
     def __init__(self, timestamp, trackPointBefore, trackPointAfter):
         
         timestampBefore = trackPointBefore.timestamp
         timestampAfter = trackPointAfter.timestamp
+        
+        deltaTimestampSeconds = (timestampAfter-timestampBefore).total_seconds()
         ratio = (float((timestamp-timestampBefore).total_seconds())/
-                     float((timestampAfter-timestampBefore).total_seconds()))
+                     float(deltaTimestampSeconds))
         
         latitudeBefore = trackPointBefore.latitude
         latitudeAfter = trackPointAfter.latitude
@@ -71,6 +76,17 @@ class InterpolatedTrackPoint(TrackPoint):
         
         longitude = longitudeBefore + (longitudeAfter - longitudeBefore) * ratio
        
+        # check if the distance between the limits is higher than half circle
+        if math.fabs(longitudeAfter - longitudeBefore) > 180:
+            # must reciprocate
+            if longitude < 0:
+                longitude = longitude + 180
+            else:
+                longitude = longitude - 180
+            self.isReciprocated = True
+        else:
+            self.isReciprocated = False
+                
         elevationBefore = trackPointBefore.elevation
         elevationAfter = trackPointAfter.elevation
         
@@ -78,7 +94,12 @@ class InterpolatedTrackPoint(TrackPoint):
         
         super(InterpolatedTrackPoint,self).__init__(latitude, longitude, elevation, timestamp)
         
+        # float value
         self.ratio = ratio
+        
+        # float value
+        self.deltaTimestampSeconds =  math.fabs(deltaTimestampSeconds)
+        
         self.trackPointBefore = trackPointBefore
         self.trackPointAfter = trackPointAfter
         
