@@ -56,8 +56,6 @@ it requires a Batch Change rename.
 
 *** ilg.apfw.geotag ***
 
->>> TO BE IMPLEMENTED
-
 Applies to: the multiple selected photos.
 
 Set the photo Longitude/Latitude (since EXIF are read only), and the custom 
@@ -83,6 +81,14 @@ Applies to: the multiple selected photos.
 
 Print the 'cameraTimeZoneName' and 'pictureTimeZoneName' custom tags, 
 if present.
+
+
+*** ilg.apfw.cleanGpsCoordinates ***
+
+Applies to: the multiple selected photos.
+
+Clean only the custom tags (write empty strings).
+The image tags cannot be removed.
 
 
 
