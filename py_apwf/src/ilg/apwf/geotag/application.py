@@ -40,20 +40,11 @@ from ilg.gpx.xmlParser import TrackHandler
 class Application(CommonApplication):
     
     def __init__(self, *argv):
-        
-        self.argv = argv
                 
-        self.aperture = Aperture()
-        
-        self.isVerbose = False
-        self.isDryRun = False
-        
         # application specific members
         
-        self.maxInterpolateTimeSeconds = 5*60   # 5 minutes
         self.maxInterpolateCoordinateSeconds = 10*60    # 10 minutes
-        
-        self.photos = None
+        self.maxInterpolateTimeSeconds = 5*60   # 5 minutes
         
         self.tracks = None
         
@@ -116,16 +107,7 @@ class Application(CommonApplication):
         self.geotag()
         
         return
-        
-
-    def getMultipleSelection(self):
-        
-        self.photos = self.aperture.getMultipleSelection()
-        print 'Processing {0} photos.'.format(len(self.photos))
-        print
-        
-        return
-    
+            
 
     def parseGpx(self):
 
@@ -160,7 +142,7 @@ class Application(CommonApplication):
     def geotag(self):
         
         print 'Geotagging photos... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             photoExifDate = self.aperture.getExifImageDate(photo)
@@ -181,7 +163,7 @@ class Application(CommonApplication):
             if trackPoint == None:
                 print ("  '{0}' from '{1}' NOT geotagged".
                        format(photoName, photoExifDate))
-                break
+                continue
             
             latitude = trackPoint.latitude
             longitude = trackPoint.longitude
@@ -191,7 +173,7 @@ class Application(CommonApplication):
                 
                 if not self._isInterpolationValid(trackPoint, photoName, 
                                                   photoExifDate):
-                    break
+                    continue
                 
                 kind = (', interpolate=({0},{1}s)'.format(
                     trackPoint.ratio, trackPoint.deltaTimestampSeconds))
@@ -220,22 +202,13 @@ class Application(CommonApplication):
         
         trackPointBefore = trackPoint.trackPointBefore
         trackPointAfter = trackPoint.trackPointAfter
-        
-        timestampBefore = trackPointBefore.timestamp
-        timestampAfter = trackPointAfter.timestamp
-
-        deltaTimestampSeconds = (timestampAfter-timestampBefore).total_seconds()
-        if (deltaTimestampSeconds > self.maxInterpolateTimeSeconds):
-            print ("  '{0}' from '{1}' NOT geotagged, more than {2} seconds apart".
-                format(photoName, photoExifDate, deltaTimestampSeconds))
-            return False
-        
+                
         latitudeBefore = trackPointBefore.latitude
         latitudeAfter = trackPointAfter.latitude
 
         deltaLatitudeSeconds = math.fabs(latitudeAfter - latitudeBefore) * 60 * 60
         if (deltaLatitudeSeconds > self.maxInterpolateCoordinateSeconds):
-            print ("  '{0}' from '{1}' NOT geotagged, more than {2} seconds of latitude apart".
+            print ("  '{0}' from '{1}' NOT geotagged, {2} seconds of latitude apart".
                 format(photoName, photoExifDate, deltaLatitudeSeconds))
             return False
         
@@ -248,8 +221,17 @@ class Application(CommonApplication):
         
         deltaLongitudeSeconds = deltaLongitudeDegrees * 60 * 60
         if (deltaLongitudeSeconds > self.maxInterpolateCoordinateSeconds):
-            print ("  '{0}' from '{1}' NOT geotagged, more than {2} seconds of longitude apart".
+            print ("  '{0}' from '{1}' NOT geotagged, {2} seconds of longitude apart".
                 format(photoName, photoExifDate, deltaLongitudeSeconds))
+            return False
+
+        timestampBefore = trackPointBefore.timestamp
+        timestampAfter = trackPointAfter.timestamp
+
+        deltaTimestampSeconds = (timestampAfter-timestampBefore).total_seconds()
+        if (deltaTimestampSeconds > self.maxInterpolateTimeSeconds):
+            print ("  '{0}' from '{1}' NOT geotagged, {2} seconds apart".
+                format(photoName, photoExifDate, deltaTimestampSeconds))
             return False
         
         return True

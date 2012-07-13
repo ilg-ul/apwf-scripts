@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/ilg/apwf/cleanGpsCoordinates/application.py=utf-8
 encoding//src/ilg/apwf/dumpMetadata/application.py=utf-8
 encoding//src/ilg/apwf/geotag/application.py=utf-8
 encoding//src/ilg/apwf/gpx.py=utf-8

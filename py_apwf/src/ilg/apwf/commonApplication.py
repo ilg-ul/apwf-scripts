@@ -2,7 +2,12 @@
 from datetime import datetime
 import pytz
 
+from appscript import k
+
 from ilg.apwf.aperture import Aperture
+
+
+CUSTOM_TAG_EMPTY_VALUE = ''
 
 
 class CommonApplication(object):
@@ -14,10 +19,28 @@ class CommonApplication(object):
         self.aperture = Aperture()
         
         self.isVerbose = False
+        self.isDryRun = False
+
+        self.selectedPhotos = None
 
         return
 
-    
+
+    def getMultipleSelection(self):
+        
+        self.selectedPhotos = self.aperture.getMultipleSelection()
+        print 'Processing {0} photos.'.format(len(self.selectedPhotos)),
+        if self.isDryRun:
+            print 'Dry run.',
+        if self.isVerbose:
+            print 'Verbose.',
+            
+        print
+        print
+        
+        return
+        
+        
     # return string
     def addCameraImageDateIfNotPresent(self, photo, cameraDate):
     
@@ -126,6 +149,50 @@ class CommonApplication(object):
         return intervalString
 
 
+    def removeGeotagInterpolateIntervalSeconds(self, photo):
+
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.setGeotagInterpolateIntervalSeconds(photo, 
+                CUSTOM_TAG_EMPTY_VALUE)
+            print ("    Removing GeotagInterpolateIntervalSeconds from '{0}'".
+                   format(photoName))
+        except:
+            pass
+        
+        return
+        
+
+    def removeGeotagInterpolateRatio(self, photo):
+
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.setGeotagInterpolateRatio(photo, 
+                CUSTOM_TAG_EMPTY_VALUE)
+            print ("    Removing GeotagInterpolateRatio from '{0}'".
+                   format(photoName))
+        except:
+            pass
+        
+        return
+        
+
+    def removeCustomAltitude(self, photo):
+
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.setCustomAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
+            print ("    Removing custom Altitude from '{0}'".
+                   format(photoName))
+        except:
+            pass
+        
+        return
+        
+
     # return string
     def updateGeotagInterpolateRatioOrAddIfNotPresent(self, photo, ratioFloat):
     
@@ -162,6 +229,19 @@ class CommonApplication(object):
         return
     
 
+    def removeGpsLatitudeLongitude(self, photo):
+        
+        photoName = photo.name.get()
+
+        self.aperture.setLatitude(photo, k.missing_value)
+        self.aperture.setLongitude(photo, k.missing_value)
+    
+        print ("    Removing Latitude/Longitude from '{0}'".
+               format(photoName))
+
+        return
+    
+    
     def parseInputDate(self, inDateString):
         
         # may raise ValueError

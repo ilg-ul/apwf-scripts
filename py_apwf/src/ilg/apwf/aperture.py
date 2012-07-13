@@ -285,7 +285,11 @@ class Aperture():
         
         custom_tags = photo.custom_tags.get()
     
-        altitudeString = str(altitudeFloat)
+        if altitudeFloat != None:
+            altitudeString = str(altitudeFloat)
+        else:
+            altitudeString = None
+            
         self.setItemByName(custom_tags, 'Altitude', altitudeString)
 
         return altitudeString

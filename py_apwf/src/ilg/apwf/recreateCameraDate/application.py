@@ -29,7 +29,7 @@ class Application(CommonApplication):
         
         super(self.__class__,self).__init__()
         
-        self.photos = None
+        self.selectedPhotos = None
         
         # clear all intermediate results
         
@@ -102,8 +102,8 @@ class Application(CommonApplication):
 
     def getMultipleSelection(self):
         
-        self.photos = self.aperture.getMultipleSelection()
-        print 'Processing {0} photos.'.format(len(self.photos))
+        self.selectedPhotos = self.aperture.getMultipleSelection()
+        print 'Processing {0} photos.'.format(len(self.selectedPhotos))
 
 
     def inputTimes(self):
@@ -111,6 +111,9 @@ class Application(CommonApplication):
         line = raw_input("Enter original and adjusted times as "
                          "'dd-mm-yyyy HH:MM:SS HH:MM:SS': ")
         line = line.strip()
+        if len(line) == 0:
+            raise ErrorWithDescription('No date')
+        
         ts = line.split()
         
         dateOrigString = ts[0] + ' ' + ts[1]
@@ -134,7 +137,7 @@ class Application(CommonApplication):
     def selectReference(self):
                
         print 'Selecting the reference photo... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
 
             photoExifDateTz = self.aperture.getExifImageDate(photo)            
             photoExifDateNoTz = photoExifDateTz.replace(tzinfo = None)
@@ -153,7 +156,7 @@ class Application(CommonApplication):
     def restoreTags(self):
         
         print 'Restoring tags... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             #photoName = photo.name.get()
             photoExifDate = self.aperture.getExifImageDate(photo)            
