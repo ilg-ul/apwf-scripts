@@ -30,8 +30,9 @@ class Tracks(object):
         
     def locateByTimestamp(self, timestamp):
         
-        for track in self.tracks:
+        for i in range(len(self.tracks)):
             
+            track = self.tracks[i]
             points = track.getPoints()
             
             try:
@@ -48,8 +49,25 @@ class Tracks(object):
                 return InterpolatedTrackPoint(timestamp, trackPointBefore, 
                                               trackPointAfter)                
                 
+            except NotFoundBeforeFirst as err:
+                if i > 0:
+                    
+                    # Try the border between tracks
+                    trackPointsBefore = self.tracks[i-1].getPoints()
+                    trackPointBefore = trackPointsBefore[len(trackPointsBefore)-1]
+                    trackPointAfter = points[0]
+                    return InterpolatedTrackPoint(timestamp, trackPointBefore, 
+                                              trackPointAfter)                
+                    
+                pass
+            
+            except NotFoundAfterLast as err:
+
+                pass
+
             except NotFound as err:
                 print err, repr(err)
+                pass
 
         return None
 
@@ -101,11 +119,13 @@ class TrackByTimestamp(object):
         if len(self._points) == 0:
             raise NotFoundEmptyTrack()
               
-        if timestamp < self._points[0].timestamp:            
+        timestampFirst = self._points[0].timestamp
+        if timestamp < timestampFirst:            
             raise NotFoundBeforeFirst()
             
         indexLast = len(self._points)-1
-        if timestamp > self._points[indexLast].timestamp:
+        timestampLast = self._points[indexLast].timestamp
+        if timestamp > timestampLast:
             raise NotFoundAfterLast()
         
         return self._recurseLocateByTimestamp(0, indexLast, timestamp)
