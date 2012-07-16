@@ -65,6 +65,23 @@ The first version will use a local gpx file, but future versions may
 access the myTrack data.
 
 
+*** ilg.apfw.checkMissingCoordinates ***
+
+Applies to: the multiple selected photos.
+
+Check the selected photos, and list those without latitude/longitude, 
+for manual geotagging.
+
+
+*** ilg.apfw.appendGoogleAltitudes ***
+
+Applies to: the multiple selected photos.
+
+Append the Google altitude to the selected photos. By default, if the
+GPS altitude is set, avoid the expensive Google access (use the --all
+to override this).
+
+
 ----- Development tools -------------------------------------------------------
 
 *** ilg.apfw.dumpMetadata ***
