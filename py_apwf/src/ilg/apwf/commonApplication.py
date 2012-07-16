@@ -68,7 +68,7 @@ class CommonApplication(object):
         try:
             self.aperture.getGpsInterpolatedReferenceDate(photo)
             cameraDateString = self.aperture.setGpsInterpolatedReferenceDate(photo, cameraDate)
-            print ("    Updated GpsInterpolatedReferenceDate='{0}' to '{1}'".
+            print ("    Updated GpsInterpolatedReferenceDate='{0}' for '{1}'".
                    format(cameraDateString, photoName))
             
             return cameraDateString
@@ -111,7 +111,7 @@ class CommonApplication(object):
         try:
             self.aperture.getCustomAltitude(photo)
             altitudeString = self.aperture.setCustomAltitude(photo, altitudeFloat)
-            print ("    Updated custom Altitude='{0}' to '{1}'".
+            print ("    Updated custom Altitude='{0}' for '{1}'".
                    format(altitudeString, photoName))
             
             return altitudeString
@@ -127,6 +127,52 @@ class CommonApplication(object):
 
 
     # return string
+    def updateGpsAltitudeOrAddIfNotPresent(self, photo, altitudeFloat):
+    
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getGpsAltitude(photo)
+            altitudeString = self.aperture.setGpsAltitude(photo, altitudeFloat)
+            print ("    Updated GpsAltitude='{0}' for '{1}'".
+                   format(altitudeString, photoName))
+            
+            return altitudeString
+        
+        except:
+            pass
+
+        altitudeString = self.aperture.addGpsAltitude(photo, altitudeFloat)
+        print ("    Added GpsAltitude='{0}' to '{1}'".
+               format(altitudeString, photoName))
+    
+        return altitudeString
+
+
+    # return string
+    def updateGoogleAltitudeOrAddIfNotPresent(self, photo, altitudeFloat):
+    
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getGoogleAltitude(photo)
+            altitudeString = self.aperture.setGoogleAltitude(photo, altitudeFloat)
+            print ("    Updated GoogleAltitude='{0}' for '{1}'".
+                   format(altitudeString, photoName))
+            
+            return altitudeString
+        
+        except:
+            pass
+
+        altitudeString = self.aperture.addGoogleAltitude(photo, altitudeFloat)
+        print ("    Added GoogleAltitude='{0}' to '{1}'".
+               format(altitudeString, photoName))
+    
+        return altitudeString
+
+
+    # return string
     def updateGeotagInterpolateIntervalSecondsOrAddIfNotPresent(self, photo, intervalFloat):
     
         photoName = photo.name.get()
@@ -134,7 +180,7 @@ class CommonApplication(object):
         try:
             self.aperture.getGeotagInterpolateIntervalSeconds(photo)
             intervalString = self.aperture.setGeotagInterpolateIntervalSeconds(photo, intervalFloat)
-            print ("    Updated GeotagInterpolateIntervalSeconds='{0}' to '{1}'".
+            print ("    Updated GeotagInterpolateIntervalSeconds='{0}' for '{1}'".
                    format(intervalString, photoName))
             
             return intervalString
@@ -154,6 +200,8 @@ class CommonApplication(object):
         photoName = photo.name.get()
                 
         try:
+            self.aperture.getGeotagInterpolateIntervalSeconds(photo)
+            # set it to empty only if it exists
             self.aperture.setGeotagInterpolateIntervalSeconds(photo, 
                 CUSTOM_TAG_EMPTY_VALUE)
             print ("    Removing GeotagInterpolateIntervalSeconds from '{0}'".
@@ -169,6 +217,8 @@ class CommonApplication(object):
         photoName = photo.name.get()
                 
         try:
+            self.aperture.getGeotagInterpolateRatio(photo)
+            # set it to empty only if it exists
             self.aperture.setGeotagInterpolateRatio(photo, 
                 CUSTOM_TAG_EMPTY_VALUE)
             print ("    Removing GeotagInterpolateRatio from '{0}'".
@@ -184,6 +234,8 @@ class CommonApplication(object):
         photoName = photo.name.get()
                 
         try:
+            self.aperture.getCustomAltitude(photo)
+            # set it to empty only if it exists
             self.aperture.setCustomAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
             print ("    Removing custom Altitude from '{0}'".
                    format(photoName))
@@ -193,6 +245,39 @@ class CommonApplication(object):
         return
         
 
+    def removeGpsAltitude(self, photo):
+
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getGpsAltitude(photo)
+            # set it to empty only if it exists
+            self.aperture.setGpsAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
+            print ("    Removing GpsAltitude from '{0}'".
+                   format(photoName))
+        except:
+            pass
+        
+        return
+
+
+    def removeGoogleAltitude(self, photo):
+
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getGoogleAltitude(photo)
+            # set it to empty only if it exists
+            self.aperture.setGoogleAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
+            print ("    Removing GoogleAltitude from '{0}'".
+                   format(photoName))
+        except:
+            pass
+        
+        return
+
+
+
     # return string
     def updateGeotagInterpolateRatioOrAddIfNotPresent(self, photo, ratioFloat):
     
@@ -201,7 +286,7 @@ class CommonApplication(object):
         try:
             self.aperture.getGeotagInterpolateRatio(photo)
             ratioString = self.aperture.setGeotagInterpolateRatio(photo, ratioFloat)
-            print ("    Updated GeotagInterpolateRatio='{0}' to '{1}'".
+            print ("    Updated GeotagInterpolateRatio='{0}' for '{1}'".
                    format(ratioString, photoName))
             
             return ratioString
@@ -223,21 +308,24 @@ class CommonApplication(object):
         self.aperture.setLatitude(photo, latitudeFloat)
         self.aperture.setLongitude(photo, longitudeFloat)
     
-        print ("    Updated Latitude={0}, Longitude={1} to '{2}'".
+        print ("    Updated Latitude={0}, Longitude={1} for '{2}'".
                format(latitudeFloat, longitudeFloat, photoName))
         
         return
     
 
-    def removeGpsLatitudeLongitude(self, photo):
+    def removeGpsLocation(self, photo):
         
         photoName = photo.name.get()
 
-        self.aperture.setLatitude(photo, k.missing_value)
-        self.aperture.setLongitude(photo, k.missing_value)
-    
-        print ("    Removing Latitude/Longitude from '{0}'".
-               format(photoName))
+        if False:
+            # unfortunately it is not possible (or I don't know how)
+            # to remove a tag value                
+            self.aperture.setLatitude(photo, k.missing_value)
+            self.aperture.setLongitude(photo, k.missing_value)
+        
+            print ("    Removing Latitude/Longitude from '{0}'".
+                   format(photoName))
 
         return
     
