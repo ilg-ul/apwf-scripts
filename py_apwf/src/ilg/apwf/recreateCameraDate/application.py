@@ -27,10 +27,8 @@ class Application(CommonApplication):
     
     def __init__(self, *argv):
         
-        super(self.__class__,self).__init__()
-        
-        self.selectedPhotos = None
-        
+        super(Application,self).__init__(*argv)
+                
         # clear all intermediate results
         
         self.dateOrig = None

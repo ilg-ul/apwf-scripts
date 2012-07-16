@@ -32,12 +32,7 @@ class Application(CommonApplication):
     
     def __init__(self, *argv):
         
-        self.argv = argv
-                
-        self.aperture = Aperture()
-        
-        self.isVerbose = False
-        self.isDryRun = False
+        super(Application,self).__init__(*argv)
         
         # application specific members
                 
@@ -112,11 +107,13 @@ class Application(CommonApplication):
             
             if not self.isDryRun:
                 
-                # unfortunately it is not possible (or I don't know how)
-                # to remove a tag value                
-                #self.removeGpsLatitudeLongitude(photo)
+                # unfortunately this is not effective               
+                self.removeGpsLocation(photo)
                 
                 self.removeCustomAltitude(photo)
+                self.removeGpsAltitude(photo)
+                self.removeGoogleAltitude(photo)
+                
                 self.removeGeotagInterpolateIntervalSeconds(photo)
                 self.removeGeotagInterpolateRatio(photo)
 

@@ -26,7 +26,6 @@ import math
 import pytz
 
 from ilg.apwf.errorWithDescription import ErrorWithDescription
-from ilg.apwf.aperture import Aperture
 from ilg.apwf.commonApplication import CommonApplication
 
 from ilg.gpx.trackPoint import InterpolatedTrackPoint
@@ -41,6 +40,8 @@ class Application(CommonApplication):
     
     def __init__(self, *argv):
                 
+        super(Application,self).__init__(*argv)
+
         # application specific members
         
         self.maxInterpolateCoordinateSeconds = 10*60    # 10 minutes
@@ -48,10 +49,13 @@ class Application(CommonApplication):
         
         self.tracks = None
         
+        return
+    
 
     def usage(self):
         
         print __doc__
+        return
 
 
     def run(self):
@@ -113,9 +117,17 @@ class Application(CommonApplication):
 
         #file_name = u'/Users/ilg/Desktop/g.gpx'
         #fileName = u'/Volumes/MacMini\ External/Library/Photos/Aperture\ GPX\ tracks/2012/20120327\ -\ Păulești\ demo.gpx'
-        fileName = u'/Volumes/MacMini\ External/Library/Photos/Aperture GPX tracks/2012/20120323 - Păulești test.gpx'
+        #fileName = u'/Volumes/MacMini\ External/Library/Photos/Aperture GPX tracks/2012/20120323 - Paulesti test.gpx'
         
+        fileName = raw_input('Enter GPX file name: ')
+        fileName = fileName.strip()
         fileName = fileName.replace('\\','')
+        
+        try:
+            f = open(fileName)
+            f.close()
+        except IOError:
+            raise ErrorWithDescription("Cannot open GPX file '{0}'".format(fileName))
         
         print "Parsing track file '{0}'... ".format(fileName)
         
@@ -135,6 +147,8 @@ class Application(CommonApplication):
             lastPointTimestamp = points[count-1].timestamp
             print ("  Track '{0}', {1} points, from '{2}' to '{3}'".format(
                 name, count, firstPointTimestamp, lastPointTimestamp))
+        
+        print
             
         return
     
@@ -168,7 +182,8 @@ class Application(CommonApplication):
             latitude = trackPoint.latitude
             longitude = trackPoint.longitude
             elevation = trackPoint.elevation
-
+            elevationString = str(elevation)
+            
             if isinstance(trackPoint, InterpolatedTrackPoint):
                 
                 if not self._isInterpolationValid(trackPoint, photoName, 
@@ -187,13 +202,17 @@ class Application(CommonApplication):
             else:
                 kind = ''
                 
+                if not self.isDryRun:
+                    self.updateGeotagInterpolateIntervalSecondsOrAddIfNotPresent(
+                        photo, 0.0)
+                
             if not self.isDryRun:
                 self.updateGpsLatitudeLongitude(photo, latitude, longitude)
-                self.updateCustomAltitudeOrAddIfNotPresent(photo, elevation)
+                elevationString = self.updateGpsAltitudeOrAddIfNotPresent(photo, elevation)
 
             print ("  '{0}' from '{1}' geotagged, lat={2}, lon={3}, alt={4}{5}".
                        format(photoName, photoExifDate, latitude, longitude, 
-                              elevation, kind))
+                              elevationString, kind))
             
         return
 

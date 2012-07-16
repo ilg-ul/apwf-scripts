@@ -28,7 +28,7 @@ class Application(CommonApplication):
     
     def __init__(self, *argv):
         
-        super(self.__class__,self).__init__()
+        super(Application,self).__init__(*argv)
         
         self.photos = None
         
