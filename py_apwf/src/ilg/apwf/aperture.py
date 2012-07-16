@@ -43,6 +43,12 @@ class Aperture():
         return sels
     
     
+    def convertAltitudeToString(self, altitudeFloat):
+        
+        altitudeString = '{0:.1f}'.format(altitudeFloat)
+        return altitudeString
+    
+    
     def getItemByName(self, coll, name):
     
         if coll == None:
@@ -161,7 +167,23 @@ class Aperture():
         #print exifImageDateTz
     
         return exifImageDateTz
+
+
+    # return float
+    def getExifAltitude(self, photo):
+        
+        exif_tags = photo.EXIF_tags.get()
+    
+        try:
+            exifAltitude = self.getItemByName(exif_tags, 'Altitude')
+            #print exifAltitude
+        except ErrorWithDescription as err:
+            err = err
+            #print err
+            raise ErrorWithDescription('No EXIF Altitude attribute')
  
+        return exifAltitude
+    
  
     def getPictureTimeZoneName(self, photo):
         
@@ -286,7 +308,7 @@ class Aperture():
         custom_tags = photo.custom_tags.get()
     
         if altitudeFloat != None:
-            altitudeString = str(altitudeFloat)
+            altitudeString = self.convertAltitudeToString(altitudeFloat)
         else:
             altitudeString = None
             
@@ -297,12 +319,84 @@ class Aperture():
 
     def addCustomAltitude(self, photo, altitudeFloat):
                 
-        altitudeString = str(altitudeFloat)
+        altitudeString = self.convertAltitudeToString(altitudeFloat)
     
         self.makeTag(photo, k.custom_tag, 'Altitude', altitudeString)
 
         return altitudeString
     
+
+    def getGpsAltitude(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        altitudeString = self.getItemByName(custom_tags, 'GpsAltitude')
+        
+        altitudeString = altitudeString.strip()
+        if len(altitudeString) == 0:
+            raise ErrorWithDescription("Empty GpsAltitude")
+        
+        return float(altitudeString)
+
+
+    def getGoogleAltitude(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        altitudeString = self.getItemByName(custom_tags, 'GoogleAltitude')
+
+        altitudeString = altitudeString.strip()
+        if len(altitudeString) == 0:
+            raise ErrorWithDescription("Empty GoogleAltitude")
+        
+        return float(altitudeString)
+
+
+    def setGpsAltitude(self, photo, altitudeFloat):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        if altitudeFloat != None:
+            altitudeString = str(altitudeFloat)
+        else:
+            altitudeString = None
+            
+        self.setItemByName(custom_tags, 'GpsAltitude', altitudeString)
+
+        return altitudeString
+
+
+    def setGoogleAltitude(self, photo, altitudeFloat):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        if altitudeFloat != None:
+            altitudeString = str(altitudeFloat)
+        else:
+            altitudeString = None
+            
+        self.setItemByName(custom_tags, 'GoogleAltitude', altitudeString)
+
+        return altitudeString
+
+
+    def addGpsAltitude(self, photo, altitudeFloat):
+                
+        altitudeString = self.convertAltitudeToString(altitudeFloat)
+    
+        self.makeTag(photo, k.custom_tag, 'GpsAltitude', altitudeString)
+
+        return altitudeString
+
+
+    def addGoogleAltitude(self, photo, altitudeFloat):
+                
+        altitudeString = self.convertAltitudeToString(altitudeFloat)
+    
+        self.makeTag(photo, k.custom_tag, 'GoogleAltitude', altitudeString)
+
+        return altitudeString
+
 
     # return float
     def getGeotagInterpolateIntervalSeconds(self, photo):
