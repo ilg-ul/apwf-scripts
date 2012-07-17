@@ -25,14 +25,12 @@ Purpose:
 
 
 import getopt
-import urllib
-import simplejson
 
+from appscript import k
 
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
-
-from appscript import k
+from ilg.apwf.google import GoogleApi
 
 
 class Application(CommonApplication):
@@ -44,6 +42,7 @@ class Application(CommonApplication):
         # application specific members
         
         self.isComplete = False
+        self.google = GoogleApi()
         
         return
     
@@ -166,7 +165,9 @@ class Application(CommonApplication):
             
             count += 1
             
-            altitudeFloat = self.getGoogleElevation(latitude, longitude)
+            # fetch elevation from Google
+            altitudeFloat = self.google.getElevation(latitude, longitude)
+            
             altitudeString = self.updateGoogleAltitudeOrAddIfNotPresent(photo, altitudeFloat)
             print ("  '{0}' from '{1}' Google alt={2}".
                        format(photoName, photoExifDate, altitudeString))
@@ -181,25 +182,4 @@ class Application(CommonApplication):
         return
 
 
-    def getGoogleElevation(self, latitude, longitude):
-        
-        requestUrl = ('http://maps.googleapis.com/maps/api/elevation/json?'
-                      'locations={0},{1}&sensor=false'.format(latitude, longitude))
-
-        f = urllib.urlopen(requestUrl)
-        parsedJsonResponse = simplejson.load(f)
-        f.close()
-        
-        if self.isVerbose:
-            print parsedJsonResponse
-        
-        results = parsedJsonResponse['results']
-        result = results[0]
-        elevationString =  result['elevation']
-        
-        return float(elevationString)
-    
-        
-    
-        
         
