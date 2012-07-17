@@ -530,3 +530,113 @@ class Aperture():
         return masterLocation
 
 
+    def getImageCountryCode(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        countryCodeString = self.getItemByName(iptc_tags, 'Country/PrimaryLocationCode')
+        return countryCodeString
+    
+    
+    def setImageCountryCode(self, photo, countryCodeString):
+
+        iptc_tags = photo.IPTC_tags.get()
+        
+        self.setItemByName(iptc_tags, 'Country/PrimaryLocationCode', countryCodeString)
+        return
+    
+    
+    def addImageCountryCode(self, photo, countryCodeString):
+
+        self.makeTag(photo, k.IPTC_tag, 'Country/PrimaryLocationCode', countryCodeString)
+        return        
+        
+    
+    def getImageCountryName(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        countryNameString = self.getItemByName(iptc_tags, 'Country/PrimaryLocationName')
+        return countryNameString
+    
+    
+    def setImageCountryName(self, photo, countryNameString):
+
+        iptc_tags = photo.IPTC_tags.get()
+        
+        self.setItemByName(iptc_tags, 'Country/PrimaryLocationName', countryNameString)
+        return
+    
+
+    def addImageCountryName(self, photo, countryNameString):
+
+        self.makeTag(photo, k.IPTC_tag, 'Country/PrimaryLocationName', countryNameString)
+        return        
+
+    
+    def getImageStateProvince(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        stateProvinceString = self.getItemByName(iptc_tags, 'Province/State')
+        return stateProvinceString
+    
+    
+    def setImageStateProvince(self, photo, stateProvinceString):
+
+        iptc_tags = photo.IPTC_tags.get()
+        
+        self.setItemByName(iptc_tags, 'Province/State', stateProvinceString)
+        return
+    
+
+    def addImageStateProvince(self, photo, stateProvinceString):
+
+        self.makeTag(photo, k.IPTC_tag, 'Province/State', stateProvinceString)
+        return        
+
+        
+    def getImageCity(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        cityString = self.getItemByName(iptc_tags, 'Image City')
+        return cityString
+    
+    
+    def setImageCity(self, photo, cityString):
+
+        iptc_tags = photo.IPTC_tags.get()
+        
+        self.setItemByName(iptc_tags, 'Image City', cityString)
+        return
+
+
+    def addImageCity(self, photo, cityString):
+
+        # the tag name 'Image City crashed
+        self.makeTag(photo, k.IPTC_tag, 'City', cityString)
+        return        
+
+    
+    def getImageSubLocation(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        subLocationString = self.getItemByName(iptc_tags, 'SubLocation')
+        return subLocationString
+    
+    
+    def setImageSubLocation(self, photo, subLocationString):
+
+        iptc_tags = photo.IPTC_tags.get()
+        
+        self.setItemByName(iptc_tags, 'SubLocation', subLocationString)
+        return
+    
+
+    def addImageSubLocation(self, photo, subLocationString):
+
+        self.makeTag(photo, k.IPTC_tag, 'SubLocation', subLocationString)
+        return        
+

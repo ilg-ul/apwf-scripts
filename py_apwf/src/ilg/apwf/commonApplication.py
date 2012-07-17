@@ -55,7 +55,8 @@ class CommonApplication(object):
         photoName = photo.name.get()
                 
         newCameraDateString = self.aperture.addCameraImageDate(photo, cameraDate)
-        print ("    Added CameraImageDate='{0}' to '{1}'".format(newCameraDateString, photoName))
+        if self.isVerbose:
+            print ("    Added CameraImageDate='{0}' to '{1}'".format(newCameraDateString, photoName))
 
         return newCameraDateString
 
@@ -68,8 +69,9 @@ class CommonApplication(object):
         try:
             self.aperture.getGpsInterpolatedReferenceDate(photo)
             cameraDateString = self.aperture.setGpsInterpolatedReferenceDate(photo, cameraDate)
-            print ("    Updated GpsInterpolatedReferenceDate='{0}' for '{1}'".
-                   format(cameraDateString, photoName))
+            if self.isVerbose:
+                print ("    Updated GpsInterpolatedReferenceDate='{0}' for '{1}'".
+                       format(cameraDateString, photoName))
             
             return cameraDateString
         
@@ -77,8 +79,9 @@ class CommonApplication(object):
             pass
 
         newCameraDateString = self.aperture.addGpsInterpolatedReferenceDate(photo, cameraDate)
-        print ("    Added GpsInterpolatedReferenceDate='{0}' to '{1}'".
-               format(newCameraDateString, photoName))
+        if self.isVerbose:
+            print ("    Added GpsInterpolatedReferenceDate='{0}' to '{1}'".
+                   format(newCameraDateString, photoName))
     
         return newCameraDateString
 
@@ -97,8 +100,9 @@ class CommonApplication(object):
         photoName = photo.name.get()
                 
         newCameraDateString = self.aperture.addGpsInterpolatedReferenceDate(photo, cameraDate)
-        print ("    Added GpsInterpolatedReferenceDate='{0}' to '{1}'".
-               format(newCameraDateString, photoName))
+        if self.isVerbose:
+            print ("    Added GpsInterpolatedReferenceDate='{0}' to '{1}'".
+                   format(newCameraDateString, photoName))
     
         return newCameraDateString
 
@@ -111,17 +115,16 @@ class CommonApplication(object):
         try:
             self.aperture.getCustomAltitude(photo)
             altitudeString = self.aperture.setCustomAltitude(photo, altitudeFloat)
-            print ("    Updated custom Altitude='{0}' for '{1}'".
-                   format(altitudeString, photoName))
+            if self.isVerbose:
+                print ("    Updated custom Altitude='{0}' for '{1}'".
+                       format(altitudeString, photoName))
             
-            return altitudeString
-        
         except:
-            pass
-
-        altitudeString = self.aperture.addCustomAltitude(photo, altitudeFloat)
-        print ("    Added custom Altitude='{0}' to '{1}'".
-               format(altitudeString, photoName))
+ 
+            altitudeString = self.aperture.addCustomAltitude(photo, altitudeFloat)
+            if self.isVerbose:
+                print ("    Added custom Altitude='{0}' to '{1}'".
+                       format(altitudeString, photoName))
     
         return altitudeString
 
@@ -134,8 +137,9 @@ class CommonApplication(object):
         try:
             self.aperture.getGpsAltitude(photo)
             altitudeString = self.aperture.setGpsAltitude(photo, altitudeFloat)
-            print ("    Updated GpsAltitude='{0}' for '{1}'".
-                   format(altitudeString, photoName))
+            if self.isVerbose:
+                print ("    Updated GpsAltitude='{0}' for '{1}'".
+                       format(altitudeString, photoName))
             
             return altitudeString
         
@@ -143,8 +147,9 @@ class CommonApplication(object):
             pass
 
         altitudeString = self.aperture.addGpsAltitude(photo, altitudeFloat)
-        print ("    Added GpsAltitude='{0}' to '{1}'".
-               format(altitudeString, photoName))
+        if self.isVerbose:
+            print ("    Added GpsAltitude='{0}' to '{1}'".
+                   format(altitudeString, photoName))
     
         return altitudeString
 
@@ -157,17 +162,15 @@ class CommonApplication(object):
         try:
             self.aperture.getGoogleAltitude(photo)
             altitudeString = self.aperture.setGoogleAltitude(photo, altitudeFloat)
-            print ("    Updated GoogleAltitude='{0}' for '{1}'".
-                   format(altitudeString, photoName))
-            
-            return altitudeString
+            if self.isVerbose:
+                print ("    Updated GoogleAltitude='{0}' for '{1}'".
+                       format(altitudeString, photoName))
         
         except:
-            pass
-
-        altitudeString = self.aperture.addGoogleAltitude(photo, altitudeFloat)
-        print ("    Added GoogleAltitude='{0}' to '{1}'".
-               format(altitudeString, photoName))
+            altitudeString = self.aperture.addGoogleAltitude(photo, altitudeFloat)
+            if self.isVerbose:
+                print ("    Added GoogleAltitude='{0}' to '{1}'".
+                       format(altitudeString, photoName))
     
         return altitudeString
 
@@ -180,17 +183,15 @@ class CommonApplication(object):
         try:
             self.aperture.getGeotagInterpolateIntervalSeconds(photo)
             intervalString = self.aperture.setGeotagInterpolateIntervalSeconds(photo, intervalFloat)
-            print ("    Updated GeotagInterpolateIntervalSeconds='{0}' for '{1}'".
-                   format(intervalString, photoName))
+            if self.isVerbose:
+                print ("    Updated GeotagInterpolateIntervalSeconds='{0}' for '{1}'".
+                       format(intervalString, photoName))
             
-            return intervalString
-        
         except:
-            pass
-
-        intervalString = self.aperture.addGeotagInterpolateIntervalSeconds(photo, intervalFloat)
-        print ("    Added GeotagInterpolateIntervalSeconds='{0}' to '{1}'".
-               format(intervalString, photoName))
+            intervalString = self.aperture.addGeotagInterpolateIntervalSeconds(photo, intervalFloat)
+            if self.isVerbose:
+                print ("    Added GeotagInterpolateIntervalSeconds='{0}' to '{1}'".
+                       format(intervalString, photoName))
     
         return intervalString
 
@@ -204,8 +205,9 @@ class CommonApplication(object):
             # set it to empty only if it exists
             self.aperture.setGeotagInterpolateIntervalSeconds(photo, 
                 CUSTOM_TAG_EMPTY_VALUE)
-            print ("    Removing GeotagInterpolateIntervalSeconds from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing GeotagInterpolateIntervalSeconds from '{0}'".
+                       format(photoName))
         except:
             pass
         
@@ -221,8 +223,9 @@ class CommonApplication(object):
             # set it to empty only if it exists
             self.aperture.setGeotagInterpolateRatio(photo, 
                 CUSTOM_TAG_EMPTY_VALUE)
-            print ("    Removing GeotagInterpolateRatio from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing GeotagInterpolateRatio from '{0}'".
+                       format(photoName))
         except:
             pass
         
@@ -237,8 +240,9 @@ class CommonApplication(object):
             self.aperture.getCustomAltitude(photo)
             # set it to empty only if it exists
             self.aperture.setCustomAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
-            print ("    Removing custom Altitude from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing custom Altitude from '{0}'".
+                       format(photoName))
         except:
             pass
         
@@ -253,8 +257,9 @@ class CommonApplication(object):
             self.aperture.getGpsAltitude(photo)
             # set it to empty only if it exists
             self.aperture.setGpsAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
-            print ("    Removing GpsAltitude from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing GpsAltitude from '{0}'".
+                       format(photoName))
         except:
             pass
         
@@ -269,8 +274,9 @@ class CommonApplication(object):
             self.aperture.getGoogleAltitude(photo)
             # set it to empty only if it exists
             self.aperture.setGoogleAltitude(photo, CUSTOM_TAG_EMPTY_VALUE)
-            print ("    Removing GoogleAltitude from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing GoogleAltitude from '{0}'".
+                       format(photoName))
         except:
             pass
         
@@ -286,17 +292,15 @@ class CommonApplication(object):
         try:
             self.aperture.getGeotagInterpolateRatio(photo)
             ratioString = self.aperture.setGeotagInterpolateRatio(photo, ratioFloat)
-            print ("    Updated GeotagInterpolateRatio='{0}' for '{1}'".
-                   format(ratioString, photoName))
+            if self.isVerbose:
+                print ("    Updated GeotagInterpolateRatio='{0}' for '{1}'".
+                       format(ratioString, photoName))
             
-            return ratioString
-        
         except:
-            pass
-
-        ratioString = self.aperture.addGeotagInterpolateRatio(photo, ratioFloat)
-        print ("    Added GeotagInterpolateRatio='{0}' to '{1}'".
-               format(ratioString, photoName))
+            ratioString = self.aperture.addGeotagInterpolateRatio(photo, ratioFloat)
+            if self.isVerbose:
+                print ("    Added GeotagInterpolateRatio='{0}' to '{1}'".
+                       format(ratioString, photoName))
     
         return ratioString
 
@@ -324,8 +328,9 @@ class CommonApplication(object):
             self.aperture.setLatitude(photo, k.missing_value)
             self.aperture.setLongitude(photo, k.missing_value)
         
-            print ("    Removing Latitude/Longitude from '{0}'".
-                   format(photoName))
+            if self.isVerbose:
+                print ("    Removing Latitude/Longitude from '{0}'".
+                       format(photoName))
 
         return
     
@@ -345,3 +350,191 @@ class CommonApplication(object):
         
         binDate = tz.localize(dt)
         return binDate
+
+
+    def getGeocodingFields(self, photo):
+        
+        crtDict = {}
+                    
+        try:
+            crtDict['CountryCode'] = self.aperture.getImageCountryCode(photo)
+        except:
+            crtDict['CountryCode'] = None
+                    
+        try:
+            crtDict['CountryName'] = self.aperture.getImageCountryName(photo)
+        except:
+            crtDict['CountryName'] = None
+                
+        try:
+            crtDict['Province'] = self.aperture.getImageStateProvince(photo)
+        except:
+            crtDict['Province'] = None
+
+        try:
+            crtDict['City'] = self.aperture.getImageCity(photo)
+        except:
+            crtDict['City'] = None
+
+        try:
+            crtDict['Location'] = self.aperture.getImageSubLocation(photo)
+        except:
+            crtDict['Location'] = None
+            
+        return crtDict
+    
+    
+    def updateGeocodingFieldsOrAddIfNotPresent(self, photo, crtDict, newDict, 
+                                               doOverwrite):
+        
+        retDict = {}
+        
+        if doOverwrite or crtDict['CountryCode'] == None:
+            val = newDict['CountryCode']
+            retDict['CountryCode'] = val
+            if val == None:
+                val =''
+            self.updateImageCountryCodeOrAddIfMissing(photo, val)
+        else:
+            retDict['CountryCode'] = None
+            
+        if doOverwrite or crtDict['CountryName'] == None:
+            val = newDict['CountryName']
+            retDict['CountryName'] = val
+            if val == None:
+                val =''
+            self.updateImageCountryNameOrAddIfMissing(photo, val)
+        else:
+            retDict['CountryName'] = None
+
+        if doOverwrite or crtDict['Province'] == None:
+            val = newDict['Province']
+            retDict['Province'] = val
+            if val == None:
+                val =''
+            self.updateImageStateProvinceOrAddIfMissing(photo, val)
+        else:
+            retDict['Province'] = None
+
+        if doOverwrite or crtDict['City'] == None:
+            val = newDict['City']
+            retDict['City'] = val
+            if val == None:
+                val =''
+            self.updateImageCityOrAddIfMissing(photo, val)
+        else:
+            retDict['City'] = None
+
+        if doOverwrite or crtDict['Location'] == None:
+            val = newDict['Location']
+            retDict['Location'] = val
+            if val == None:
+                val =''
+            self.updateImageSubLocationOrAddIfMissing(photo, val)
+        else:
+            retDict['Location'] = None
+            
+        return retDict
+    
+
+    def updateImageCountryCodeOrAddIfMissing(self, photo, countryCodeString):
+        
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getImageCountryCode(photo)
+            self.aperture.setImageCountryCode(photo, countryCodeString)
+            if self.isVerbose:
+                print ("    Updated IPTC Country/PrimaryLocationCode='{0}' for '{1}'".
+                       format(countryCodeString, photoName))
+        
+        except:
+            self.aperture.addImageCountryCode(photo, countryCodeString)
+            if self.isVerbose:
+                print ("    Added IPTC Country/PrimaryLocationCode='{0}' to '{1}'".
+                       format(countryCodeString, photoName))
+    
+        return
+
+
+    def updateImageCountryNameOrAddIfMissing(self, photo, countryNameString):
+        
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getImageCountryName(photo)
+            self.aperture.setImageCountryName(photo, countryNameString)
+            if self.isVerbose:
+                print ("    Updated IPTC Country/PrimaryLocationName='{0}' for '{1}'".
+                       format(countryNameString, photoName))
+        
+        except:
+            self.aperture.addImageCountryName(photo, countryNameString)
+            if self.isVerbose:
+                print ("    Added IPTC Country/PrimaryLocationName='{0}' to '{1}'".
+                       format(countryNameString, photoName))
+    
+        return
+
+
+    def updateImageStateProvinceOrAddIfMissing(self, photo, stateProvinceString):
+        
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getImageStateProvince(photo)
+            self.aperture.setImageStateProvince(photo, stateProvinceString)
+            if self.isVerbose:
+                print ("    Updated IPTC Province/State='{0}' for '{1}'".
+                       format(stateProvinceString, photoName))
+        
+        except:
+            self.aperture.addImageStateProvince(photo, stateProvinceString)
+            if self.isVerbose:
+                print ("    Added IPTC Province/State='{0}' to '{1}'".
+                       format(stateProvinceString, photoName))
+    
+        return
+
+
+    def updateImageCityOrAddIfMissing(self, photo, cityString):
+        
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getImageCity(photo)
+            self.aperture.setImageCity(photo, cityString)
+            if self.isVerbose:
+                print ("    Updated IPTC Image City='{0}' for '{1}'".
+                       format(cityString, photoName))
+        
+        except:
+            self.aperture.addImageCity(photo, cityString)
+            if self.isVerbose:
+                print ("    Added IPTC Image City='{0}' to '{1}'".
+                       format(cityString, photoName))
+    
+        return
+
+        
+    def updateImageSubLocationOrAddIfMissing(self, photo, subLocationString):
+        
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getImageSubLocation(photo)
+            self.aperture.setImageSubLocation(photo, subLocationString)
+            if self.isVerbose:
+                print ("    Updated IPTC SubLocation='{0}' for '{1}'".
+                       format(subLocationString, photoName))
+        
+        except:
+            self.aperture.addImageSubLocation(photo, subLocationString)
+            if self.isVerbose:
+                print ("    Added IPTC SubLocation='{0}' to '{1}'".
+                       format(subLocationString, photoName))
+    
+        return
+
+  
+        
