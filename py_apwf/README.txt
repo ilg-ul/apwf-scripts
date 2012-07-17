@@ -82,6 +82,14 @@ GPS altitude is set, avoid the expensive Google access (use the --all
 to override this).
 
 
+*** ilg.apfw.fillLocationNames ***
+
+Applies to: the multiple selected photos.
+
+Fill the IPTC image geocoding fields for the selected photos. By default, if the
+values are set, avoid the expensive Google access.
+
+
 ----- Development tools -------------------------------------------------------
 
 *** ilg.apfw.dumpMetadata ***
