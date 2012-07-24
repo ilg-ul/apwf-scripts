@@ -85,19 +85,24 @@ class Application():
     def process(self):
         
         print
-        print "Rename the selected photos, using the current date template."
+        print "Rename the selected photos, using the UTC capture date template."
         print
 
         self.getMultipleSelection()        
         
         self.rename()
         
+        return
+        
 
     def getMultipleSelection(self):
         
         self.photos = self.aperture.getMultipleSelection()
         print 'Processing {0} photos.'.format(len(self.photos))
-
+        print
+        
+        return
+    
 
     def rename(self):
         

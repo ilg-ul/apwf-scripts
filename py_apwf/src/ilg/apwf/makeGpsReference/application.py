@@ -106,6 +106,11 @@ class Application(CommonApplication):
             gpsReferenceDate = None
             
         #print 'GpsReferenceDate="{0}"'.format(gpsReferenceDate)  
+
+        photoName = photo.name.get()
+        photoExifDate = self.aperture.getExifImageDate(self.photo)
+        
+        print ("Processing '{0}' from '{1}'".format(photoName, photoExifDate))
         
         mustUpdate = False
         mustAdd = False
@@ -122,7 +127,7 @@ class Application(CommonApplication):
                 
         if mustUpdate or mustAdd:
             
-            line = raw_input('Enter the UTC GPS reference date & time '
+            line = raw_input('Enter the UTC date & time '
                              '(DD-MM-YYYY hh:mm:ss): ')
             
             if line == None:
@@ -139,7 +144,6 @@ class Application(CommonApplication):
                 raise ErrorWithDescription("The date is not formatted as "
                        "'DD-MM-YYYY hh:mm:ss', ignored.")
                 
-            photoExifDate = self.aperture.getExifImageDate(self.photo)
             self.addCameraImageDateIfNotPresent(self.photo, photoExifDate)
 
             self.adjustImageDate(self.photo, newDateUtc)
@@ -149,14 +153,20 @@ class Application(CommonApplication):
                 
                 self.aperture.makeTag(photo, k.custom_tag, 
                     'GpsReferenceDate', newGpsDateString)
-                print ("Added GpsReferenceDate='{}'".
-                       format(newGpsDateString))
+                if self.isVerbose:
+                    print ("  Added GpsReferenceDate='{0}'".
+                           format(newGpsDateString))
                 
             elif mustUpdate:
                 
                 self.aperture.setItemByName(custom_tags, 
-                    'GpsReferenceDate', newGpsDateString)       
-                print ("Updated GpsReferenceDate='{}'".
+                    'GpsReferenceDate', newGpsDateString)  
+                if self.isVerbose:
+                    print ("  Updated GpsReferenceDate='{0}'".
+                           format(newGpsDateString))
+                
+            if mustAdd or mustUpdate:
+                print ("Photo marked as GPS reference '{0}'".
                        format(newGpsDateString))
                 
         return
