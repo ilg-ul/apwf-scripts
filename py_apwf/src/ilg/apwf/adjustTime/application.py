@@ -17,6 +17,7 @@ Purpose:
 
 
 import getopt
+import math
 
 from datetime import timedelta
 
@@ -28,9 +29,9 @@ class Application(CommonApplication):
     
     def __init__(self, *argv):
         
-        super(self.__class__,self).__init__()
+        super(Application,self).__init__(*argv)
         
-        self.photos = None
+        self.selectedPhotos = None
         
         # clear all intermediate results
         
@@ -53,12 +54,14 @@ class Application(CommonApplication):
     def usage(self):
         
         print __doc__
+        return
 
 
     def run(self):
         
         try:
-            (opts, args) = getopt.getopt(self.argv[1:], 'hv', ['help', 'verbose'])
+            (opts, args) = getopt.getopt(self.argv[1:], 'nhv', 
+                                         ['dry', 'help', 'verbose'])
         except getopt.GetoptError as err:
             # print help information and exit:
             print str(err) # will print something like "option -a not recognised"
@@ -73,7 +76,9 @@ class Application(CommonApplication):
                     
             for (o, a) in opts:
                 a = a
-                if o in ('-v', '--verbose'):
+                if o in ('-n', '--dry'):
+                    self.isDryRun = True
+                elif o in ('-v', '--verbose'):
                     self.isVerbose = True
                 elif o in ('-h', '--help'):
                     self.usage()
@@ -114,15 +119,24 @@ class Application(CommonApplication):
         self.computeTimeOffsetSeconds()
          
         self.validateImageDateAdjustment()
-        self.performImageDateAdjustment()
+        
+        if not self.isDryRun:
+            self.performImageDateAdjustment()
         
         return
         
 
     def getMultipleSelection(self):
         
-        self.photos = self.aperture.getMultipleSelection()
-        print 'Processing {0} photos.'.format(len(self.photos))
+        self.selectedPhotos = self.aperture.getMultipleSelection()
+        print 'Processing {0} photos.'.format(len(self.selectedPhotos)),
+        if self.isDryRun:
+            print 'Dry run.',
+        if self.isVerbose:
+            print 'Verbose.',
+            
+        print
+        print
         
         return
 
@@ -133,7 +147,7 @@ class Application(CommonApplication):
         collectionModel = None
         
         print 'Checking same camera make and model... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             if self.isVerbose:
@@ -178,7 +192,7 @@ class Application(CommonApplication):
     def backupCreationDate(self):
         
         print 'Backing up the creation date of photos in collection... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             cameraDate = self.aperture.getExifImageDate(photo)
             self.addCameraImageDateIfNotPresent(photo, cameraDate)
@@ -202,7 +216,7 @@ class Application(CommonApplication):
         lastPhotoDate = None
     
         print 'Identifying first/last photos in collection... '
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             if self.isVerbose:
@@ -221,8 +235,8 @@ class Application(CommonApplication):
                 lastPhotoDate = photoDate
                 lastPhoto = photo
            
-        print "  first photo '{0}'".format(firstPhoto.name.get())
-        print "  last photo '{0}'".format(lastPhoto.name.get())
+        print "  first photo: '{0}'".format(firstPhoto.name.get())
+        print "  last photo: '{0}'".format(lastPhoto.name.get())
         
         # store results in class members
         self.firstPhotoInCollection = firstPhoto
@@ -242,7 +256,7 @@ class Application(CommonApplication):
     
         print 'Checking for any GPS reference in collection... '
     
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             if self.isVerbose:
@@ -252,7 +266,7 @@ class Application(CommonApplication):
                 # Only the photos having the custom tag will end
                 # properly, regular photos will raise an exception
                 self.aperture.getGpsReferenceDate(photo)
-                print "   '{0}' is a GPS reference".format(photoName)
+                print "  '{0}' is a GPS reference".format(photoName)
                 
             except Exception:
                 # ignore photos without a GPS reference date
@@ -345,10 +359,15 @@ class Application(CommonApplication):
                     gpsAfterPhoto = photo
                     gpsAfterPhotoDate = photoDate
                 
-        print "  reference before is '{0}'".format(gpsBeforePhoto.name.get())
-        print "  reference after is '{0}'".format(gpsAfterPhoto.name.get())
-        
+        print "  reference before: '{0}'".format(gpsBeforePhoto.name.get())
+        if gpsAfterPhoto != None:
+            print "  reference after: '{0}'".format(gpsAfterPhoto.name.get())
+        else:
+            print "  reference after: None"
+            
         self.gpsBeforePhoto = gpsBeforePhoto
+        
+        # may be None, if the GPS reference is in the set
         self.gpsAfterPhoto = gpsAfterPhoto
         
         return
@@ -406,19 +425,12 @@ class Application(CommonApplication):
         
         # ... the time offset to the original camera date
         self.timedeltaToCamera = photoNewDate - photoCameraDate
-        
-        # and the time offset to the actual Exif date
-        self.timedeltaToExif = photoNewDate - photoExifDate
-                
+                        
         return
 
 
     def validateImageDateAdjustment(self):
-        
-        # The offset is computed to the original camera date
-        # offsetToCameraSeconds = self.timedeltaToCamera.total_seconds()
-        offsetToExifSeconds = self.timedeltaToExif.total_seconds()
-              
+                      
         # initialise the interpolate mean square error 
         interpolateMse = 0
         # initialise the interpolate mean value
@@ -431,30 +443,61 @@ class Application(CommonApplication):
         
         mustAdjustDate = False
         
-        print "Preparing to 'adjust time' action for the following photos:"
-        for photo in self.photos:
+        if self.gpsAfterPhoto != None:
+            gpsLastAvailable = self.gpsAfterPhoto
+        else:
+            gpsLastAvailable = self.gpsPhotoInCollection
+            
+        gpsLastAvailableCameraDate = self.aperture.getCameraImageDate(gpsLastAvailable)
+        
+        countShift = 0
+        countInterpolate = 0
+        
+        timedeltaToCameraSeconds = self.timedeltaToCamera.total_seconds()
+        
+        if self.gpsPhotoInCollection != None:
+            reason = "exactly"
+        else:
+            reason = "interpolated"
+        
+        print ("Preparing to 'adjust time' with {0} {1} seconds for the following photos:".
+               format(reason, timedeltaToCameraSeconds))
+        
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             photoExifDate = self.aperture.getExifImageDate(photo)
             photoCameraDate = self.aperture.getCameraImageDate(photo)
             adjustedDate = photoCameraDate + self.timedeltaToCamera
 
+            if photoCameraDate > gpsLastAvailableCameraDate:
+                print ("  '{0}' from '{1}' to '{2}' after GPS reference".
+                        format(photoName, photoExifDate, adjustedDate))
+                continue
+
             shiftTimedelta = adjustedDate - photoExifDate
             shiftTimedeltaSeconds = shiftTimedelta.total_seconds()
             
-            shiftDelta = shiftTimedeltaSeconds - offsetToExifSeconds
-            shiftMean += shiftDelta
-            shiftMse += (shiftDelta*shiftDelta)
-                   
+            if shiftTimedeltaSeconds != 0:
+                shiftDelta = shiftTimedeltaSeconds
+
+                shiftMean += shiftDelta
+                shiftMse += (shiftDelta*shiftDelta)
+
+                countShift += 1
+                                              
             interpolatedDate = self.interpolate(photo, self.gpsBeforePhoto, 
-                                                   self.gpsAfterPhoto)
+                                                   gpsLastAvailable)
             
             errorTimedelta = adjustedDate - interpolatedDate
             errorTimedeltaSeconds = errorTimedelta.total_seconds()
+            if errorTimedeltaSeconds != 0:
+                            
+                interpolateMean += errorTimedeltaSeconds
+                interpolateMse += (errorTimedeltaSeconds*errorTimedeltaSeconds)
             
-            interpolateMean += errorTimedeltaSeconds
-            interpolateMse += (errorTimedeltaSeconds*errorTimedeltaSeconds)
-            
+                countInterpolate += 1
+
             if shiftTimedeltaSeconds != 0:
                 
                 mustAdjustDate = True
@@ -474,36 +517,31 @@ class Application(CommonApplication):
                     print ("  '{0}' time '{1}' properly set".
                            format(photoName, photoExifDate))
                 else:  
-                    print ("  '{0}' time '{1}' properly set, interpolation delta {2} sec".
+                    print ("  '{0}' time '{1}' properly set, interpolation delta {2} seconds".
                            format(photoName, photoExifDate, errorTimedeltaSeconds))
-                
-        interpolateMean /= len(self.photos)
-        interpolateMse /= len(self.photos)
         
-        shiftMean /= len(self.photos)
-        shiftMse /= len(self.photos)
+        if countInterpolate > 0:        
+            interpolateMean /= countInterpolate
+            interpolateMse /= countInterpolate
+            interpolateMse = math.sqrt(interpolateMse)
+            
+        if countShift > 0:
+            shiftMean /= countShift
+            shiftMse /= countShift
+            shiftMse = math.sqrt(shiftMse)
             
         if not mustAdjustDate: 
             raise ErrorWithDescription('All photos in this collection '
                 'have the time properly set, nothing to do.')
            
         if interpolateMean != 0 or interpolateMse != 0:
-            print ('Interpolation mean offset={0}, interpolation mean square error={1}'.
+            print ('Interpolation error mean value={0}, mean square error={1}'.
                    format(interpolateMean, interpolateMse))
-        
-        if shiftMean == 0 and shiftMse == 0:            
-            msg = ('Do you want to apply an offset of {0} seconds?'.
-                   format(offsetToExifSeconds))
-        else:
-            msg = ('Do you want to apply an offset of {0} (shift mean square error is {1})?'.
-                   format(offsetToExifSeconds, shiftMse))
-        
-        msg += ' (Yes): '
-        line = raw_input(msg)
 
-        if line != 'Yes':
-            raise ErrorWithDescription('No changes.')
-        
+        if shiftMean != 0 or shiftMse != 0:            
+            print ('Shift offset mean value={0}, mean square error={1}'.
+                   format(shiftMean, shiftMse))
+                
         return
     
     
@@ -511,10 +549,19 @@ class Application(CommonApplication):
     # Add the offset to the original camera date
     
     def performImageDateAdjustment(self):
+
+        timedeltaToCameraSeconds = self.timedeltaToCamera.total_seconds()
         
+        msg = ('Do you want to apply an offset of {0} seconds? (Yes): '.
+                   format(timedeltaToCameraSeconds))
+        line = raw_input(msg)
+
+        if line != 'Yes':
+            raise ErrorWithDescription('No changes.')
+
         print 'Adjusting time... '
         
-        for photo in self.photos:
+        for photo in self.selectedPhotos:
             
             photoName = photo.name.get()
             
