@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from datetime import datetime
 import pytz
@@ -22,6 +23,9 @@ class CommonApplication(object):
         self.isDryRun = False
 
         self.selectedPhotos = None
+
+        self.locationKeyNames = ['CountryCode', 'CountryName', 
+                                 'Province', 'City', 'Location']
 
         return
 
@@ -312,7 +316,8 @@ class CommonApplication(object):
         self.aperture.setLatitude(photo, latitudeFloat)
         self.aperture.setLongitude(photo, longitudeFloat)
     
-        print ("    Updated Latitude={0}, Longitude={1} for '{2}'".
+        if self.isVerbose:
+            print ("    Updated Latitude={0}, Longitude={1} for '{2}'".
                format(latitudeFloat, longitudeFloat, photoName))
         
         return
@@ -355,86 +360,79 @@ class CommonApplication(object):
     def getGeocodingFields(self, photo):
         
         crtDict = {}
+        crtDict['hasNone'] = False
                     
         try:
             crtDict['CountryCode'] = self.aperture.getImageCountryCode(photo)
         except:
             crtDict['CountryCode'] = None
+            crtDict['hasNone'] = True
                     
         try:
             crtDict['CountryName'] = self.aperture.getImageCountryName(photo)
         except:
             crtDict['CountryName'] = None
+            crtDict['hasNone'] = True
                 
         try:
             crtDict['Province'] = self.aperture.getImageStateProvince(photo)
         except:
             crtDict['Province'] = None
+            crtDict['hasNone'] = True
 
         try:
             crtDict['City'] = self.aperture.getImageCity(photo)
         except:
             crtDict['City'] = None
+            crtDict['hasNone'] = True
 
         try:
             crtDict['Location'] = self.aperture.getImageSubLocation(photo)
         except:
             crtDict['Location'] = None
-            
+            crtDict['hasNone'] = True
+                        
         return crtDict
+
     
-    
-    def updateGeocodingFieldsOrAddIfNotPresent(self, photo, crtDict, newDict, 
-                                               doOverwrite):
+    def checkFieldsToUpdate(self, photo, crtDict, newDict, doOverwrite):
         
         retDict = {}
-        
-        if doOverwrite or crtDict['CountryCode'] == None:
-            val = newDict['CountryCode']
-            retDict['CountryCode'] = val
-            if val == None:
-                val =''
-            self.updateImageCountryCodeOrAddIfMissing(photo, val)
-        else:
-            retDict['CountryCode'] = None
-            
-        if doOverwrite or crtDict['CountryName'] == None:
-            val = newDict['CountryName']
-            retDict['CountryName'] = val
-            if val == None:
-                val =''
-            self.updateImageCountryNameOrAddIfMissing(photo, val)
-        else:
-            retDict['CountryName'] = None
-
-        if doOverwrite or crtDict['Province'] == None:
-            val = newDict['Province']
-            retDict['Province'] = val
-            if val == None:
-                val =''
-            self.updateImageStateProvinceOrAddIfMissing(photo, val)
-        else:
-            retDict['Province'] = None
-
-        if doOverwrite or crtDict['City'] == None:
-            val = newDict['City']
-            retDict['City'] = val
-            if val == None:
-                val =''
-            self.updateImageCityOrAddIfMissing(photo, val)
-        else:
-            retDict['City'] = None
-
-        if doOverwrite or crtDict['Location'] == None:
-            val = newDict['Location']
-            retDict['Location'] = val
-            if val == None:
-                val =''
-            self.updateImageSubLocationOrAddIfMissing(photo, val)
-        else:
-            retDict['Location'] = None
+        retDict['changed'] = False
+       
+        for key in ['CountryCode', 'CountryName', 'Province', 'City', 'Location']:
+            if doOverwrite or crtDict[key] == None:
+                val = newDict[key]
+                if val == None:
+                    val ='-'
+                
+                retDict[key] = val
+                
+                retDict['changed'] = True
+            else:
+                retDict[key] = None
             
         return retDict
+    
+     
+    def updateGeocodingFieldsOrAddIfNotPresent(self, photo, newDict):
+        
+        if newDict['CountryCode'] != None:
+            self.updateImageCountryCodeOrAddIfMissing(photo, newDict['CountryCode'])
+            
+        if newDict['CountryName'] != None:
+            self.updateImageCountryNameOrAddIfMissing(photo, newDict['CountryName'])
+
+        if newDict['Province'] != None:
+            self.updateImageStateProvinceOrAddIfMissing(photo, newDict['Province'])
+
+        if newDict['City'] != None:
+            self.updateImageCityOrAddIfMissing(photo, newDict['City'])
+
+        if newDict['Location'] != None:
+            self.updateImageSubLocationOrAddIfMissing(photo, newDict['Location'])
+            
+        return
     
 
     def updateImageCountryCodeOrAddIfMissing(self, photo, countryCodeString):
@@ -537,4 +535,16 @@ class CommonApplication(object):
         return
 
   
+    def fixSedilaDiacritics(self, strName):
+        
+        if strName == None:
+            return None
+        
+        strName = strName.replace(u'ş',u'ș')
+        strName = strName.replace(u'Ş',u'Ș')
+        strName = strName.replace(u'ţ',u'ț')
+        strName = strName.replace(u'Ţ',u'Ț')
+        
+        return strName
+    
         
