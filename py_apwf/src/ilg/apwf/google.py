@@ -12,7 +12,11 @@ class GoogleApi(object):
        
         self.isVerbose = isVerbose
         return
+
     
+    def getServerAddress(self):
+        return 'http://maps.googleapis.com'
+
    
     # The Google Elevation API
     # https://developers.google.com/maps/documentation/elevation/
@@ -133,7 +137,9 @@ class GoogleApi(object):
         except:
             pass
         
-        for keyName in ['route', 'establishment', 'sublocality', 'neighborhood', 'postal_code', 'administrative_area_level_3']:      
+        for keyName in ['route', 'establishment', 'sublocality', 'neighborhood', 
+                        'postal_code', 'administrative_area_level_3', 
+                        'street_number']:      
             if keyName in jsonDict:
                 if location == None:
                     location = jsonDict[keyName]
@@ -151,7 +157,7 @@ class GoogleApi(object):
                 del jsonDict[keyName]
         
         if len(jsonDict) > 0:
-            raise ErrorWithDescription('Unprocessed geocodding data: {0}'.format(jsonDict))
+            raise ErrorWithDescription('Unprocessed geocoding data: {0}'.format(jsonDict))
         
         return resultDict
     
