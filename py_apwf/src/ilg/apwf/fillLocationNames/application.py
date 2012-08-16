@@ -56,7 +56,7 @@ class Application(CommonApplication):
         
         try:
             (opts, args) = getopt.getopt(self.argv[1:], 'nohv', 
-                                         ['dry', 'overwrite', 'help', 'verbose'])
+                                    ['dry', 'overwrite', 'help', 'verbose'])
         except getopt.GetoptError as err:
             # print help information and exit:
             print str(err) # will print something like "option -a not recognised"
@@ -160,21 +160,33 @@ class Application(CommonApplication):
                 continue
                             
             # fetch geocoding data from Google
-            newDict = self.google.getReverseGeocoding(latitude, longitude)
+            googleDict = self.google.getReverseGeocoding(latitude, longitude)
             
-            # update all fields that changed
-            changedDict = self.updateGeocodingFieldsOrAddIfNotPresent(photo, crtDict, newDict, 
+            adjDict = self.adjustLocations(googleDict)
+            
+            # check fields that changed
+            changedDict = self.checkFieldsToUpdate(photo, crtDict, adjDict, 
                                                         self.doOverwrite)
+
+            if changedDict['changed'] == False:
+                print "  '{0}' from '{1}' unchanged".format(photoName, photoExifDate)
+                continue
+                
+            if not self.isDryRun and changedDict['changed']:
+                # update all fields that changed
+                self.updateGeocodingFieldsOrAddIfNotPresent(photo, changedDict)
             
             print "  '{0}' from '{1}' update".format(photoName, photoExifDate),
             for key in ['CountryCode', 'CountryName', 'Province', 'City', 'Location']:
                 val = changedDict[key]
                 if val != None:
-                    print "{0}='{1}'".format(key, val),
+                    print "{0}='{1}'".format(key, val.encode('utf-8')),
             print
             
             count += 1
 
+        if self.isDryRun:
+            return
         
         if count == 0:
             print '... nothing to do.'
@@ -186,4 +198,25 @@ class Application(CommonApplication):
         return
 
 
+    def adjustLocations(self, inDict):
+        
+        province = inDict['Province']
+        city = inDict['City']
+        
+        if province == 'Bucharest' and city == 'Bucharest':
+            inDict['Province'] = '-'
+            inDict['City'] = u'București'
+
+        country = inDict['CountryName']
+        if country == 'Romania' and inDict['Province'] != '-':
+            inDict['Province'] = 'Jud. ' + inDict['Province']
+        
+        if country == 'Romania':
+            inDict['Province'] = self.fixSedilaDiacritics(inDict['Province'])
+            inDict['City'] = self.fixSedilaDiacritics(inDict['City'])
+            inDict['Location'] = self.fixSedilaDiacritics(inDict['Location'])
+                 
+        return inDict
+    
+    
         
