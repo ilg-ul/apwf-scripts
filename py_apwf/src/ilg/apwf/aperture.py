@@ -640,3 +640,68 @@ class Aperture():
         self.makeTag(photo, k.IPTC_tag, 'SubLocation', subLocationString)
         return        
 
+
+    def getFlickrID(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        flickrIdString = self.getItemByName(custom_tags, 'Flickr ID')
+
+        flickrIdString = flickrIdString.strip()
+        if len(flickrIdString) == 0:
+            raise ErrorWithDescription("Empty Flickr ID")
+        
+        return flickrIdString
+
+
+    def getObjectName(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        objectNameString = self.getItemByName(iptc_tags, 'ObjectName')
+        return objectNameString
+    
+
+    def getHeadline(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        headlineString = self.getItemByName(iptc_tags, 'Headline')
+        return headlineString
+
+
+    def getCaption(self, photo):
+        
+        iptc_tags = photo.IPTC_tags.get()
+        
+        captionString = self.getItemByName(iptc_tags, 'Caption/Abstract')
+        return captionString
+
+    
+    def getKeywords(self, photo):
+        
+        coll = photo.keywords.get()
+        
+        if coll == None:
+            return []
+        
+        if len(coll) == 0:
+            return []
+        
+        keywords = {}
+        
+        for item in coll:
+            
+            keywordName = item.name.get()
+            
+            try:
+                keywordParents = item.parents.get()
+                keywordParentsOut = keywordParents.split('\t')
+                
+            except:
+                keywordParentsOut = []
+
+            keywords[keywordName] = keywordParentsOut
+
+        return keywords
+    
