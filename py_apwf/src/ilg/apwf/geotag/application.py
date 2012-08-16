@@ -7,6 +7,9 @@ Usage:
 Options:
     -n, --dry
         dry run, do not add/update tags
+
+    -o, --overwrite
+        Process all photos, even if the coordinates were already filled in.
         
     -v, --verbose
         print progress output
@@ -44,6 +47,8 @@ class Application(CommonApplication):
 
         # application specific members
         
+        self.doOverwrite = False
+        
         self.maxInterpolateCoordinateSeconds = 10*60    # 10 minutes
         self.maxInterpolateTimeSeconds = 5*60   # 5 minutes
         
@@ -61,7 +66,8 @@ class Application(CommonApplication):
     def run(self):
         
         try:
-            (opts, args) = getopt.getopt(self.argv[1:], 'nhv', ['dry', 'help', 'verbose'])
+            (opts, args) = getopt.getopt(self.argv[1:], 'nohv', 
+                            ['dry', 'overwrite', 'help', 'verbose'])
         except getopt.GetoptError as err:
             # print help information and exit:
             print str(err) # will print something like "option -a not recognised"
@@ -78,6 +84,8 @@ class Application(CommonApplication):
                 a = a
                 if o in ('-n', '--dry'):
                     self.isDryRun = True
+                elif o in ('-o', '--overwrite'):
+                    self.doOverwrite = True
                 elif o in ('-v', '--verbose'):
                     self.isVerbose = True
                 elif o in ('-h', '--help'):
@@ -115,10 +123,6 @@ class Application(CommonApplication):
 
     def parseGpx(self):
 
-        #file_name = u'/Users/ilg/Desktop/g.gpx'
-        #fileName = u'/Volumes/MacMini\ External/Library/Photos/Aperture\ GPX\ tracks/2012/20120327\ -\ Păulești\ demo.gpx'
-        #fileName = u'/Volumes/MacMini\ External/Library/Photos/Aperture GPX tracks/2012/20120323 - Paulesti test.gpx'
-        
         fileName = raw_input('Enter GPX file name: ')
         fileName = fileName.strip()
         fileName = fileName.replace('\\','')
@@ -167,7 +171,8 @@ class Application(CommonApplication):
             latitude = photo.latitude.get()
             longitude = photo.longitude.get()
             
-            if latitude != k.missing_value and longitude != k.missing_value:
+            if (latitude != k.missing_value and longitude != k.missing_value 
+                and not self.doOverwrite):
                 
                 print ("  '{0}' from '{1}' already geotagged, lat={2}, lon={3}".
                        format(photoName, photoExifDate, latitude, latitude))
