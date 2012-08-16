@@ -206,14 +206,16 @@ class Application():
         for item in coll:
             
             keywordName = item.name.get()
+            keywordNameUtf = keywordName.encode('utf-8')
             
             try:
                 keywordParent = item.parent.get()
                 keywordParentOut = str(keywordParent)
-                print "keyword '{0}' of '{1}'".format(keywordName, keywordParentOut)
+                print "keyword '{0}' of '{1}'".format(keywordNameUtf, 
+                                                      keywordParentOut)
                 
             except:
-                print "keyword '{0}'".format(keywordName)
+                print "keyword '{0}'".format(keywordNameUtf)
                                                 
         return
 
