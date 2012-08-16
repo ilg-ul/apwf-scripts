@@ -155,7 +155,7 @@ class Application():
         
         self.dumpCollection("other", photo.other_tags.get())
         
-        self.dumpKeywords(photo.keywords.get())
+        self.dumpKeywords(photo)
                   
         return
 
@@ -193,29 +193,25 @@ class Application():
                         
         return
 
-    def dumpKeywords(self, coll):
+    def dumpKeywords(self, photo):
+        
+        keywords = self.aperture.getKeywords(photo)
+        
+        if len(keywords) == 0:
+            return
         
         print
         
-        if coll == None:
-            return
-        
-        if len(coll) == 0:
-            return
-        
-        for item in coll:
+        for keywordName in keywords.keys():
             
-            keywordName = item.name.get()
             keywordNameUtf = keywordName.encode('utf-8')
             
-            try:
-                keywordParent = item.parent.get()
-                keywordParentOut = str(keywordParent)
-                print "keyword '{0}' of '{1}'".format(keywordNameUtf, 
-                                                      keywordParentOut)
-                
-            except:
+            keywordParents = keywords[keywordName]
+            if len(keywordParents) == 0:
                 print "keyword '{0}'".format(keywordNameUtf)
-                                                
-        return
-
+            else:
+                print "keyword '{0}' of {1}".format(keywordNameUtf, 
+                                                      keywordParents)
+              
+        return  
+        
