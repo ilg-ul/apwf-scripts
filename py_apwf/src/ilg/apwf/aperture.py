@@ -43,6 +43,16 @@ class Aperture():
         return sels
     
     
+    def getId(self, photo):
+        
+        return photo.id.get()
+    
+
+    def getName(self, photo):
+        
+        return photo.name.get()
+    
+    
     def convertAltitudeToString(self, altitudeFloat):
         
         altitudeString = '{0:.1f}'.format(altitudeFloat)
