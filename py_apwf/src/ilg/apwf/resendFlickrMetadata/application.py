@@ -21,7 +21,7 @@ import getopt
 
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
-
+from ilg.apwf.apertureNonportable import ApertureNonportable
 
 class Application(CommonApplication):
     
@@ -30,6 +30,8 @@ class Application(CommonApplication):
         super(Application,self).__init__(*argv)
 
         # application specific members
+        
+        self.apertureNonportable = ApertureNonportable()
         
         return
     
@@ -161,29 +163,34 @@ class Application(CommonApplication):
         return
 
 
+    # favour headline for title, default to version name
     def computeFlickrTitle(self, photo):
             
         flickrTitle = ""
         
+        # first try the headline field
         try:
-            objectNameString = self.aperture.getObjectName(photo)
+            headlineString = self.aperture.getHeadline(photo)
         except ErrorWithDescription:
-            objectNameString = ""
+            headlineString = ""
+        headlineString = headlineString.strip()
+        if len(headlineString) > 0:
+            flickrTitle = headlineString
+            
+        if len(flickrTitle) == 0:
         
-        objectNameString = objectNameString.strip()
-        if len(objectNameString) > 0:
-            flickrTitle = objectNameString
+            # than try the title, which is more technical (like file name)
+            try:
+                objectNameString = self.aperture.getObjectName(photo)
+            except ErrorWithDescription:
+                objectNameString = ""
+            
+            objectNameString = objectNameString.strip()
+            if len(objectNameString) > 0:
+                flickrTitle = objectNameString
                     
         if len(flickrTitle) == 0:
-            try:
-                headlineString = self.aperture.getHeadline(photo)
-            except ErrorWithDescription:
-                headlineString = ""
-            headlineString = headlineString.strip()
-            if len(headlineString) > 0:
-                flickrTitle = headlineString
-        
-        if len(flickrTitle) == 0:
+            # default to version name
             photoName = photo.name.get()
             flickrTitle = photoName
 
@@ -279,6 +286,7 @@ class Application(CommonApplication):
                     
                     tags[parentKeywordName] = 'p'
 
+        # create tags from location names
         for key in ['CountryName', 'Province', 'City', 'Location']:
                
             val = crtDict[key]
@@ -287,17 +295,64 @@ class Application(CommonApplication):
                 for subval in vals:
                     if len(subval) > 0:
                         tags[subval] = 'l'
+        
+        # create tags from names
+        fullNames = self.getFacesFullNames(photo)
+        
+        for fullName in fullNames:
+            
+            # one tag for each full name
+            tags[fullName] = 'f'
+              
+            for name in fullName.split():
                 
+                # another tag for each first/last name
+                tags[name] = 'f'
+                
+                if False:
+                    faceNameWithoutDiacritics = self.removeDiacritics(name)
+                    
+                    # another fag for each name without diacritics
+                    tags[faceNameWithoutDiacritics] = 'f'
+
         return tags.keys()
 
     
     def isTagExportable(self, tag):
         
-        for ch in tag:
-            
-            if ch.islower():
-                return True
-            
-        return False
-    
+        tag = tag.strip()
         
+        if tag[0] == '[':
+                return False
+            
+        return True
+
+
+    def removeDiacritics(self, name):
+        
+        # TODO: remove diacritics
+        return name
+    
+    
+    def getFacesFullNames(self, photo):
+        
+        facesNames = []
+        photoId = self.aperture.getId(photo)
+        
+        masterUuid = self.apertureNonportable.getMasterUuid(photoId)
+        
+        faceKeys = self.apertureNonportable.getFaceKeys(masterUuid)
+        
+        for faceKey in faceKeys:
+            
+            namesTuple = self.apertureNonportable.getFaceNames(faceKey)
+            if namesTuple != None:
+                (name, fullName) = namesTuple
+                if fullName != None:
+                    facesNames.append(fullName)
+                else:
+                    facesNames.append(name)
+        
+        return facesNames
+    
+    
