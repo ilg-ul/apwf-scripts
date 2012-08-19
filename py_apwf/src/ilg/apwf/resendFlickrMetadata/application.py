@@ -22,6 +22,7 @@ import getopt
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
 from ilg.apwf.apertureNonportable import ApertureNonportable
+from ilg.apwf.flickr import Flickr
 
 class Application(CommonApplication):
     
@@ -32,6 +33,7 @@ class Application(CommonApplication):
         # application specific members
         
         self.apertureNonportable = ApertureNonportable()
+        self.flickr = Flickr()
         
         return
     
@@ -127,17 +129,17 @@ class Application(CommonApplication):
             photoName = photo.name.get()
             photoExifDate = self.aperture.getExifImageDate(photo)
 
+            flickrIdString = self.aperture.getFlickrID(photo)
+
             print ("  '{0}' from '{1}'".
                        format(photoName, photoExifDate))
             
-            flickrIdString = self.aperture.getFlickrID(photo)
-
             # ${Title|Headline|Filename}
             
             flickrTitle = self.computeFlickrTitle(photo)   
-            print "    Title='{0}'".format(flickrTitle)
-            
-            
+            if self.isVerbose:
+                print "    Title='{0}'".format(flickrTitle)
+                        
             # prepare values, check None or '-'
             crtDict = self.getGeocodingFields(photo)
             for key in self.locationKeyNames:
@@ -151,14 +153,20 @@ class Application(CommonApplication):
                 crtDict[key] = val
             
             flickrDescription = self.computeFlickrDescription(photo, flickrTitle, crtDict)
-            print "    Description='{0}'".format(flickrDescription)
+            if self.isVerbose:
+                print "    Description='{0}'".format(flickrDescription)
                
+            self.flickr.setPhotoMetadata(flickrIdString, flickrTitle, flickrDescription)
+            
             flickrTags = self.computeFlickrTags(photo, crtDict)
-            print "    Tags=[",
-            for tag in flickrTags:
-                flickrTagUtf = tag.encode('utf-8')
-                print "'{0}'".format(flickrTagUtf),
-            print "]"
+            if self.isVerbose:
+                print "    Tags=[",
+                for tag in flickrTags:
+                    flickrTagUtf = tag.encode('utf-8')
+                    print "'{0}'".format(flickrTagUtf),
+                print "]"
+
+            self.flickr.setPhotoTags(flickrIdString, flickrTags)
                                                         
         return
 
@@ -241,7 +249,8 @@ class Application(CommonApplication):
         
         # TODO: add 'Airborne' if needed
         
-        flickrDescription += '<br>'
+        flickrDescription += '\n' #'<br>'
+
 
         photoExifDate = self.aperture.getExifImageDate(photo)
         monShortString = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 
@@ -254,7 +263,7 @@ class Application(CommonApplication):
         if flickrTitle != photoName:
             flickrDescription += ', {0}'.format(photoName)
         
-        flickrDescription += '<br>'
+        flickrDescription += '\n' #'<br>'
         
         try:
             captionString = self.aperture.getCaption(photo)
