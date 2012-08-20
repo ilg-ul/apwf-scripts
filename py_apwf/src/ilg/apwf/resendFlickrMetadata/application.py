@@ -5,6 +5,12 @@ Usage:
     python ilg.apwf.resendFlickrMetadata [options]
 
 Options:
+    -n, --dry
+        dry run, do not add/update tags
+
+    -o, --overwrite
+        Process all photos, even if the coordinates were already filled in.
+
     -v, --verbose
         print progress output
 
@@ -18,6 +24,7 @@ Purpose:
 
 
 import getopt
+from datetime import datetime
 
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
@@ -35,6 +42,8 @@ class Application(CommonApplication):
         self.apertureNonportable = ApertureNonportable()
         self.flickr = Flickr()
         
+        self.doOverwrite = False
+        
         return
     
 
@@ -47,7 +56,7 @@ class Application(CommonApplication):
     def run(self):
         
         try:
-            (opts, args) = getopt.getopt(self.argv[1:], 'hv', ['help', 'verbose'])
+            (opts, args) = getopt.getopt(self.argv[1:], 'nohv', ['dry', 'overwrite', 'help', 'verbose'])
         except getopt.GetoptError as err:
             # print help information and exit:
             print str(err) # will print something like "option -a not recognised"
@@ -62,7 +71,11 @@ class Application(CommonApplication):
                     
             for (o, a) in opts:
                 a = a
-                if o in ('-v', '--verbose'):
+                if o in ('-n', '--dry'):
+                    self.isDryRun = True
+                elif o in ('-o', '--overwrite'):
+                    self.doOverwrite = True
+                elif o in ('-v', '--verbose'):
                     self.isVerbose = True
                 elif o in ('-h', '--help'):
                     self.usage()
@@ -120,7 +133,7 @@ class Application(CommonApplication):
             print 'not published on Flickr, quitting.'
             return         
         
-        print '... all photos published on Flickr.'
+        print '... all photos published on Flickr, continue.'
         print
         
         print 'Resending metadata... '
@@ -132,8 +145,27 @@ class Application(CommonApplication):
             flickrIdString = self.aperture.getFlickrID(photo)
 
             print ("  '{0}' from '{1}'".
-                       format(photoName, photoExifDate))
+                       format(photoName, photoExifDate)),
             
+            if not self.doOverwrite:    
+                try:
+                    metadataDate = self.aperture.getFlickrMetadataDate(photo)
+                    
+                    lastModifiedDateWithoutTimeZone = self.aperture.getLastModifiedDateWithoutTimeZone(photo)                
+                    lastModifiedDateWithTimeZone = lastModifiedDateWithoutTimeZone.replace(tzinfo=metadataDate.tzinfo)
+                    
+                    deltaSeconds = (lastModifiedDateWithTimeZone - metadataDate).total_seconds()
+                    if not deltaSeconds > 9:
+                        # allow some guard to propagate the LastModifiedDate
+                        print 'up to date'
+                        continue
+                    
+                except ErrorWithDescription:
+                    pass
+
+            if self.isVerbose:
+                print
+                
             # ${Title|Headline|Filename}
             
             flickrTitle = self.computeFlickrTitle(photo)   
@@ -155,8 +187,13 @@ class Application(CommonApplication):
             flickrDescription = self.computeFlickrDescription(photo, flickrTitle, crtDict)
             if self.isVerbose:
                 print "    Description='{0}'".format(flickrDescription)
-               
-            self.flickr.setPhotoMetadata(flickrIdString, flickrTitle, flickrDescription)
+             
+            didSetMetadata = False  
+            if not self.isDryRun:
+                didSetMetadata = self.flickr.setPhotoMetadata(flickrIdString, 
+                                            flickrTitle, flickrDescription)
+                if not self.isVerbose:
+                    print '... meta',
             
             flickrTags = self.computeFlickrTags(photo, crtDict)
             if self.isVerbose:
@@ -166,7 +203,20 @@ class Application(CommonApplication):
                     print "'{0}'".format(flickrTagUtf),
                 print "]"
 
-            self.flickr.setPhotoTags(flickrIdString, flickrTags)
+            didSendTags = False
+            if not self.isDryRun:
+                didSendTags = self.flickr.setPhotoTags(flickrIdString, flickrTags)
+                
+                if not self.isVerbose:
+                    print '... tags',
+
+                if didSetMetadata and didSendTags:
+                    
+                    nowWithTimeZone = datetime.now(photoExifDate.tzinfo)
+                    self.updateFlickrMetadataDateOrAddIfNotPresent(photo, nowWithTimeZone)
+                
+                if not self.isVerbose:
+                    print '... updated'
                                                         
         return
 
@@ -223,29 +273,29 @@ class Application(CommonApplication):
 
         flickerAltitudeInt = None
         try:
-            flickerAltitudeInt = int(self.aperture.getExifAltitude(photo))
+            flickerAltitudeInt = int(round(self.aperture.getExifAltitude(photo)))
         except:
             pass
         
         if flickerAltitudeInt == None:
             try:
-                flickerAltitudeInt = int(self.aperture.getGpsAltitude(photo))
+                flickerAltitudeInt = int(round(self.aperture.getGpsAltitude(photo)))
             except:
                 pass
         
         if flickerAltitudeInt == None:
             try:
-                flickerAltitudeInt = int(self.aperture.getGoogleAltitude(photo))
+                flickerAltitudeInt = int(round(self.aperture.getGoogleAltitude(photo)))
             except:
                 pass
         
-        if flickerAltitudeInt == None:
+        if flickerAltitudeInt != None:
             if mustAddComma:
                 flickrDescription += ', '
             else:
                 # on first value do not add comma
                 mustAddComma = True
-            flickrDescription += '{0} m'
+            flickrDescription += '{0} m'.format(flickerAltitudeInt)
         
         # TODO: add 'Airborne' if needed
         
@@ -263,7 +313,7 @@ class Application(CommonApplication):
         if flickrTitle != photoName:
             flickrDescription += ', {0}'.format(photoName)
         
-        flickrDescription += '\n' #'<br>'
+        flickrDescription += '\n\n' #'<br>'
         
         try:
             captionString = self.aperture.getCaption(photo)
