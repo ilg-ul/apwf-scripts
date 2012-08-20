@@ -175,7 +175,14 @@ class Application():
             itemName = item.name.get()
             
             try:
-                itemValue = item.value.get().decode('utf-8')
+                itemValue = item.value.get()
+                
+                # kludge to mask some unicode problem
+                v = '{0} {1}'.format(itemValue, itemValue.__class__)
+                
+                #if isinstance(itemValue, str):
+                #    itemValue = itemValue.decode('utf-8')
+                
             except:
                 itemValue = None
                 
