@@ -26,12 +26,7 @@ class Flickr():
         
     def setPhotoTags(self, photoIdString, tagsList):
         
-        tagsString = ''
-        for tag in tagsList:
-            if tagsString != '':
-                tagsString += ','
-            tagsString += tag
-            
+        tagsString = ','.join(tagsList)    
         response = self.flickrapi.photos_setTags(photo_id=photoIdString, 
                                                  tags=tagsString)
 
