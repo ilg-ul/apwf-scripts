@@ -82,12 +82,40 @@ class CommonApplication(object):
         except:
             pass
 
-        newCameraDateString = self.aperture.addGpsInterpolatedReferenceDate(photo, cameraDate)
+        newCameraDateString = self.aperture.addGpsInterpolatedReferenceDate(
+                                                photo, cameraDate)
         if self.isVerbose:
             print ("    Added GpsInterpolatedReferenceDate='{0}' to '{1}'".
                    format(newCameraDateString, photoName))
     
         return newCameraDateString
+
+
+    # return string
+    def updateFlickrMetadataDateOrAddIfNotPresent(self, photo, metadataDate):
+    
+        photoName = photo.name.get()
+                
+        try:
+            self.aperture.getFlickrMetadataDate(photo)
+            metadataDateString = self.aperture.setFlickrMetadataDate(photo, 
+                        metadataDate)
+            if self.isVerbose:
+                print ("    Updated FlickrMetadataDate='{0}' for '{1}'".
+                       format(metadataDateString, photoName))
+            
+            return metadataDateString
+        
+        except:
+            pass
+
+        newMetadataDateString = self.aperture.addFlickrMetadataDate(photo, 
+                        metadataDate)
+        if self.isVerbose:
+            print ("    Added FlickrMetadataDate='{0}' to '{1}'".
+                   format(newMetadataDateString, photoName))
+    
+        return newMetadataDateString
 
 
     # return string
