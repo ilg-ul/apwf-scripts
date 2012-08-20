@@ -532,6 +532,38 @@ class Aperture():
         return
     
 
+    # Return a date with time zone or raise exception
+    def getFlickrMetadataDate(self, photo):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        flickrMetadataDateString = self.getItemByName(custom_tags, 
+                                                   'FlickrMetadataDate')
+        
+        flickrMetadataDate = self.parseStringDate(flickrMetadataDateString)
+        return flickrMetadataDate
+
+
+    def addFlickrMetadataDate(self, photo, flickrMetadataDate):
+                
+        flickrMetadataDateString = self.convertDateToString(flickrMetadataDate)    
+        self.makeTag(photo, k.custom_tag, 'FlickrMetadataDate', 
+                     flickrMetadataDateString)
+
+        return flickrMetadataDateString
+
+
+    def setFlickrMetadataDate(self, photo, newDate):
+        
+        custom_tags = photo.custom_tags.get()
+    
+        newDateString = self.convertDateToString(newDate)
+        self.setItemByName(custom_tags, 'FlickrMetadataDate', 
+                           newDateString)
+
+        return newDateString
+    
+
     def getMasterLocation(self, photo):
         
         other_tags = photo.other_tags.get()
@@ -686,6 +718,14 @@ class Aperture():
         
         captionString = self.getItemByName(iptc_tags, 'Caption/Abstract')
         return captionString
+
+
+    def getLastModifiedDateWithoutTimeZone(self, photo):
+        
+        other_tags = photo.other_tags.get()
+
+        lastModifiedDate = self.getItemByName(other_tags, 'LastModifiedDate')        
+        return lastModifiedDate
 
     
     def getKeywords(self, photo):
