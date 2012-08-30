@@ -72,3 +72,18 @@ class ApertureNonportable():
         return (name, fullName)
 
     
+    def getAlbumVersionIdsBlob(self, albumId):
+        
+        command = 'select selectedVersionIds from RKAlbum where uuid=:uuid;'
+        
+        cursor = self.libraryConnection.cursor()
+        cursor.execute(command, {"uuid":albumId})
+        
+        raw = cursor.fetchone()
+        if raw == None:
+            return None
+        
+        blob = raw['selectedVersionIds']
+        
+        return blob
+        
