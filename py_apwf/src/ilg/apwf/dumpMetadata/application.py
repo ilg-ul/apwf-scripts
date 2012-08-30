@@ -176,29 +176,31 @@ class Application():
             
             try:
                 itemValue = item.value.get()
-                
-                # kludge to mask some unicode problem
-                v = '{0} {1}'.format(itemValue, itemValue.__class__)
-                
-                #if isinstance(itemValue, str):
-                #    itemValue = itemValue.decode('utf-8')
-                
+                                
             except:
                 itemValue = None
                 
-            #if itemName == 'ImageDate':
-            #    pass    # to allow a breakpoint
-            
             if isinstance(itemValue, appscript.reference.Reference):
-                print "{0} {1}: {2} name: '{3}'".format(name, itemName, itemValue, itemValue.name.get())
-            else:
                 itemValueOut = str(itemValue)
+                itemValueName = itemValue.name.get()
+                itemValueNameOut = str(itemValueName.encode('utf-8'))
+                
+                print "{0} {1}: {2} name: '{3}'".format(name, itemName, 
+                                            itemValueOut, itemValueNameOut)
+            else:
+                if isinstance(itemValue, unicode):
+                    itemValueOut = str(itemValue.encode('utf-8'))
+                else:
+                    itemValueOut = str(itemValue)
+                    
                 try:
-                    print "{0} {1}: {2} {3}".format(name, itemName, itemValueOut, str(itemValue.__class__))
+                    print "{0} {1}: {2} {3}".format(name, itemName, 
+                                    itemValueOut, str(itemValue.__class__))
                 except:
                     print "!{0} {1}:".format(name, itemName)
                         
         return
+
 
     def dumpKeywords(self, photo):
         
