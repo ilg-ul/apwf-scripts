@@ -6,6 +6,9 @@ import pytz
 from appscript import k
 
 from ilg.apwf.aperture import Aperture
+from ilg.apwf.errorWithDescription import ErrorWithDescription
+
+from ilg.apwf.flickr import FlickrException
 
 
 CUSTOM_TAG_EMPTY_VALUE = ''
@@ -575,4 +578,92 @@ class CommonApplication(object):
         
         return strName
     
+
+    def computeParentAlbum(self):
         
+        # consider only the first selected photo 
+        photo = self.selectedPhotos[0]
+        parent = photo.parent.get()
+        
+        albumName = parent.name.get()
+        count = parent.image_versions.count()
+                
+        print "Parent album '{0}' has {1} photos.".format(albumName, count)
+        print
+        
+        self.selectedPhoto = photo
+            
+        return
+    
+
+    def computeAlbumPhotosOrdered(self):
+        
+        # normally, the order should be obtained from Aperture, but, for unknown
+        # reasons, in Python the order does not come properly (either 
+        # py-appscript messes it or even Aperture itself). 
+
+        parent = self.selectedPhoto.parent.get()
+        albumPhotos = parent.image_versions.get()
+        
+        # currently sort photos by EXIF date and name     
+        self.albumPhotosOrdered = sorted(albumPhotos, key=lambda photo: 
+            (self.aperture.getExifImageDate(photo),self.aperture.getName(photo)))
+        
+        return
+
+    
+    def checkPhotosPublished(self):
+        
+        count = 0
+        print 'Checking parent album photos... '
+        for photo in self.albumPhotosOrdered:
+            
+            photoName = photo.name.get()
+            photoExifDate = self.aperture.getExifImageDate(photo)
+            
+            try:
+                self.aperture.getFlickrID(photo)
+            except ErrorWithDescription:
+                count += 1
+                print ("  '{0}' from '{1}' not published on Flickr".
+                       format(photoName, photoExifDate))
+                
+        if count > 0:
+            if count == 1:
+                retMsg = '... 1 photo'
+            else:
+                retMsg = '... {0} photos'.format(count)
+                    
+            retMsg += ' not published on Flickr, quitting.'
+            
+            raise ErrorWithDescription(retMsg)         
+        
+        print '... all photos published on Flickr, continue.'
+        print
+
+        return
+    
+    
+    def addPhotosToFlickrSet(self):
+         
+        print   
+        print "Adding photos to Flickr set '{0}'... ".format(self.flickrSetName)
+                                                        
+        for photo in self.albumPhotosOrdered:
+            
+            photoName = photo.name.get()
+            photoExifDate = self.aperture.getExifImageDate(photo)
+
+            flickrPhotoId = self.aperture.getFlickrID(photo)
+
+            try:
+                self.flickr.addPhotoToSet(self.flickrSetId, flickrPhotoId)
+            except FlickrException:
+                continue
+            
+            print ("  '{0}' from '{1}'".
+                       format(photoName, photoExifDate))
+            
+        return
+
+
