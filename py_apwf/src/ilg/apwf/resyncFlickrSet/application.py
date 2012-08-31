@@ -28,7 +28,7 @@ import getopt
 
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
-from ilg.apwf.apertureNonportable import ApertureNonportable
+#from ilg.apwf.apertureNonportable import ApertureNonportable
 from ilg.apwf.flickr import Flickr
 from ilg.apwf.flickr import FlickrException
 
@@ -112,8 +112,13 @@ class Application(CommonApplication):
         
         self.selectFlickrSet()
         
-        #self.removePhotosFromFlickerSet()
-        #self.addPhotosToFlickrSet()
+        self.getFlickrSetPhotos()
+        
+        if not (self.doOverwrite or self.checkIfSetChanged()):
+            raise ErrorWithDescription('No changes in Flickr set content, nothing to do.')
+        
+        self.removePhotosFromFlickerSet()
+        self.addPhotosToFlickrSet()
         
         return
             
@@ -190,20 +195,71 @@ class Application(CommonApplication):
             
             flickrSet = flickrSetsOrdered[inNumber]
             
-        
         self.flickrSetId = flickrSet['id']
         self.flickrSetName = flickrSet['title']
         
         return
     
    
+    def getFlickrSetPhotos(self):
+        
+        print   
+        print "Enumerating photos from Flickr set '{0}'... ".format(self.flickrSetName),
+        
+        self.flickrSetPhotoIds = self.flickr.getSetPhotos(self.flickrSetId)
+        
+        print "done."
+        
+        return
+    
+
+    # return True if something changed
+    def checkIfSetChanged(self):
+        
+        if len(self.flickrSetPhotoIds) != len(self.albumPhotosOrdered):
+            return True
+        
+        for i in range(len(self.flickrSetPhotoIds)):
+            
+            flickrSetPhotoId = self.flickrSetPhotoIds[i]
+            photo = self.albumPhotosOrdered[i]
+            
+            flickrPhotoId = self.aperture.getFlickrID(photo)
+            if flickrSetPhotoId != flickrPhotoId:
+                return True
+
+        return False
+    
+        
     def removePhotosFromFlickerSet(self):
         
         print   
-        print "Removing photos from Flickr set '{0}'... ".format(self.flickrSetName)
         
-        while True:
-            pass
+        firstFlickrPhotoId = self.aperture.getFlickrID(self.albumPhotosOrdered[0])
+        
+        doPreserveFirst = False
+        for flickrSetPhotoId in self.flickrSetPhotoIds:
+            if firstFlickrPhotoId == flickrSetPhotoId:
+                doPreserveFirst = True
+                break
+        
+        if doPreserveFirst:
+            print "Removing most photos from Flickr set '{0}' except one... ".format(self.flickrSetName),
+            for flickrSetPhotoId in self.flickrSetPhotoIds:
+                if firstFlickrPhotoId != flickrSetPhotoId:
+                    # remove all, except the first one
+                    self.flickr.removePhotoFromSet(self.flickrSetId, flickrSetPhotoId)
+        else:
+            print "Removing all photos from Flickr set '{0}'... ".format(self.flickrSetName),
+            # add first, to keep set non empty
+            self.flickr.addPhotoToSet(self.flickrSetId, firstFlickrPhotoId)
+            print "adding key photo..."
+            
+            # then remove all old ones
+            for flickrSetPhotoId in self.flickrSetPhotoIds:
+                self.flickr.removePhotoFromSet(self.flickrSetId, flickrSetPhotoId)        
+
+        print "done."
             
         return
     
