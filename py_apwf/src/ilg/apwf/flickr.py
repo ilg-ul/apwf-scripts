@@ -14,6 +14,16 @@ class FlickrException(Exception):
         
         return
     
+    
+    def getCode(self):
+        
+        return self.codeString
+    
+    
+    def getDescription(self):
+        
+        return self.descriptionString
+    
         
     def __str__(self):
         return '{0} (code={1})'.format(self.descriptionString, self.codeString)
@@ -78,11 +88,33 @@ class Flickr():
     
     def getSetPhotos(self, setIdString):
         
-        #sets = []
+        photoIds = []
         
+        page = 1
         while True:
             
-            pass
+            response = self.flickrapi.photosets_getPhotos(photoset_id=setIdString, page=page)
+        
+            try:
+                parsedJson = self.parseJsonResponse(response)
+            except FlickrException as ex:
+                if page == 1:
+                    raise ex
+                
+                if ex.getCode() == 1:
+                    break
+                
+                raise ex
+            
+            if len(parsedJson['photoset']['photo']) == 0:
+                break
+            
+            for setPhoto in parsedJson['photoset']['photo']:
+                photoIds.append(setPhoto['id'])
+                
+            page += 1
+
+        return photoIds
 
         
     def createSet(self, title, photoIdString):
@@ -103,3 +135,14 @@ class Flickr():
         self.parseJsonResponse(response)
 
         return
+
+
+    def removePhotoFromSet(self, setIdString, photoIdString):
+        
+        response = self.flickrapi.photosets_removePhoto(photoset_id=setIdString,
+                                            photo_id=photoIdString)
+        
+        self.parseJsonResponse(response)
+
+        return
+    
