@@ -732,13 +732,14 @@ class Aperture():
         
         coll = photo.keywords.get()
         
+        keywords = {}
+        
         if coll == None:
-            return []
+            return keywords
         
         if len(coll) == 0:
-            return []
+            return keywords
         
-        keywords = {}
         
         for item in coll:
             
