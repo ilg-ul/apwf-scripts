@@ -656,13 +656,15 @@ class CommonApplication(object):
 
             flickrPhotoId = self.aperture.getFlickrID(photo)
 
+            print("  '{0}' from '{1}'".
+                       format(photoName, photoExifDate)),
             try:
                 self.flickr.addPhotoToSet(self.flickrSetId, flickrPhotoId)
-            except FlickrException:
+                print('succeeded')
+            except FlickrException as ex:
+                print('failed [{0}]'.format(ex))
                 continue
             
-            print ("  '{0}' from '{1}'".
-                       format(photoName, photoExifDate))
             
         return
 
