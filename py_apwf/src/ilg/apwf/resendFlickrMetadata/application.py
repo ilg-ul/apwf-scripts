@@ -136,6 +136,8 @@ class Application(CommonApplication):
         print '... all photos published on Flickr, continue.'
         print
         
+        count = 0
+        changed = 0
         print 'Resending metadata... '
         for photo in self.selectedPhotos:
             
@@ -146,6 +148,8 @@ class Application(CommonApplication):
 
             print ("  '{0}' from '{1}'".
                        format(photoName, photoExifDate)),
+                       
+            count += 1
             
             if not self.doOverwrite:    
                 try:
@@ -217,6 +221,10 @@ class Application(CommonApplication):
                 
                 if not self.isVerbose:
                     print '... updated'
+                    
+                changed += 1
+        
+        print 'Updated {0} of {1} photos.'.format(changed, count)
                                                         
         return
 
@@ -296,8 +304,43 @@ class Application(CommonApplication):
                 # on first value do not add comma
                 mustAddComma = True
             flickrDescription += '{0} m'.format(flickerAltitudeInt)
-        
-        # TODO: add 'Airborne' if needed
+
+        hasKeywordUnderground = self.aperture.hasKeyword(photo, 'Underground')
+        hasKeywordAirborne = self.aperture.hasKeyword(photo, 'Airborne')
+                        
+        if hasKeywordUnderground:
+            if mustAddComma:
+                flickrDescription += ', '
+            else:
+                # on first value do not add comma
+                mustAddComma = True
+            flickrDescription += 'Underground'
+            
+            try:
+                flickerGpsAltitudeInt = int(round(self.aperture.getGpsAltitude(photo)))
+                flickerGoogleAltitudeInt = int(round(self.aperture.getGoogleAltitude(photo)))
+                
+                flickrDescription += ' ({0:+d} m)'.format(int(round(
+                            flickerGpsAltitudeInt-flickerGoogleAltitudeInt)))
+            except:
+                pass
+            
+        elif hasKeywordAirborne:
+            if mustAddComma:
+                flickrDescription += ', '
+            else:
+                # on first value do not add comma
+                mustAddComma = True
+            flickrDescription += 'Airborne'
+            
+            try:
+                flickerGpsAltitudeInt = int(round(self.aperture.getGpsAltitude(photo)))
+                flickerGoogleAltitudeInt = int(round(self.aperture.getGoogleAltitude(photo)))
+                
+                flickrDescription += ' ({0:+d} m)'.format(int(round(
+                            flickerGpsAltitudeInt-flickerGoogleAltitudeInt)))
+            except:
+                pass
         
         flickrDescription += '\n' #'<br>'
 
