@@ -109,10 +109,33 @@ class Application(CommonApplication):
             
     def createFlickrSet(self):
         
-        setName = raw_input('Enter new set name: ')
+        # suggest a default set name (based on my project/album naming convention)
+        try:
+            photo = self.selectedPhoto
+            parent = photo.parent.get()
+            
+            albumName = parent.name.get()
+            project = self.aperture.getMasterProject(photo)
+            projectName = project.name.get()
+        
+            defaultName = '{0} ({1})'.format(projectName.split(' - ')[1], 
+                                             albumName.split(' - ')[1])
+            
+            # TODO: add first-last dates
+        except:
+            defaultName = None
+        
+        prompt = 'Enter the new set name: '
+        if defaultName != None:
+            prompt += '[{0}] '.format(defaultName)
+            
+        setName = raw_input(prompt)
         setName = setName.strip()
         if len(setName) == 0:
-            raise ErrorWithDescription('Empty name')
+            if defaultName != None:
+                setName = defaultName
+            else:
+                raise ErrorWithDescription('Empty name')
         
         print   
         print "Creating Flickr set '{0}'...".format(setName),
@@ -134,6 +157,8 @@ class Application(CommonApplication):
         print ("Key photo '{0}' from '{1}'".
                        format(photoName, photoExifDate))
 
+        self.countAddedPhotos = 1
+        
         return
     
    
