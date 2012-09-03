@@ -572,6 +572,14 @@ class Aperture():
         return masterLocation
 
 
+    def getMasterProject(self, photo):
+        
+        other_tags = photo.other_tags.get()
+
+        masterProject = self.getItemByName(other_tags, 'MasterProject')        
+        return masterProject
+
+
     def getImageCountryCode(self, photo):
         
         iptc_tags = photo.IPTC_tags.get()
@@ -755,4 +763,24 @@ class Aperture():
             keywords[keywordName] = keywordParentsOut
 
         return keywords
-    
+ 
+ 
+    def hasKeyword(self, photo, keywordString):
+        
+        coll = photo.keywords.get()
+        
+        if coll == None:
+            return False
+        
+        if len(coll) == 0:
+            return False
+        
+        
+        for item in coll:
+            
+            keywordName = item.name.get()
+            
+            if keywordName == keywordString:
+                return True
+            
+        return False
