@@ -36,7 +36,13 @@ class CommonApplication(object):
     def getMultipleSelection(self):
         
         self.selectedPhotos = self.aperture.getMultipleSelection()
-        print 'Processing {0} photos.'.format(len(self.selectedPhotos)),
+        count = len(self.selectedPhotos)
+        
+        if count == 1:
+            print 'Processing 1 photo.',
+        else:
+            print 'Processing {0} photos.'.format(count),
+            
         if self.isDryRun:
             print 'Dry run.',
         if self.isVerbose:
@@ -661,10 +667,15 @@ class CommonApplication(object):
             try:
                 self.flickr.addPhotoToSet(self.flickrSetId, flickrPhotoId)
                 print('succeeded')
+                
+                self.countAddedPhotos += 1
+
             except FlickrException as ex:
                 print('failed [{0}]'.format(ex))
                 continue
             
+        
+        print '{0} photos added.'.format(self.countAddedPhotos)
             
         return
 
