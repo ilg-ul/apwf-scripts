@@ -644,7 +644,7 @@ class CommonApplication(object):
             
             raise ErrorWithDescription(retMsg)         
         
-        print '... all photos published on Flickr, continue.'
+        print '... all photos are published on Flickr, continue.'
         print
 
         return
