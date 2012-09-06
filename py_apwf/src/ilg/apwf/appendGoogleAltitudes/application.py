@@ -41,7 +41,7 @@ class Application(CommonApplication):
 
         # application specific members
         
-        self.isComplete = False
+        self.doProcessAll = False
         self.google = GoogleApi()
         
         return
@@ -74,7 +74,7 @@ class Application(CommonApplication):
                 if o in ('-n', '--dry'):
                     self.isDryRun = True
                 elif o in ('-a', '--all'):
-                    self.isComplete = True
+                    self.doProcessAll = True
                 elif o in ('-v', '--verbose'):
                     self.isVerbose = True
                 elif o in ('-h', '--help'):
@@ -111,16 +111,22 @@ class Application(CommonApplication):
     def getMultipleSelection(self):
         
         self.selectedPhotos = self.aperture.getMultipleSelection()
-        print 'Processing {0} photos.'.format(len(self.selectedPhotos)),
+        count = len(self.selectedPhotos)
+        if count == 1:
+            print 'Processing 1 photo.',
+        else:
+            print 'Processing {0} photos.'.format(count),
+            
         if self.isDryRun:
             print 'Dry run.',
         if self.isVerbose:
             print 'Verbose.',
-        if self.isComplete:
-            print 'Complete.',
+        if self.doProcessAll:
+            print 'All.',
             
         print
         print
+
     
     def processAltitudes(self):
         
@@ -148,20 +154,20 @@ class Application(CommonApplication):
             except:
                 pass    # not existing
             
-            if not self.isComplete:          
+            if not self.doProcessAll:          
                 try:
                     self.aperture.getGpsAltitude(photo)
-                    continue
+                    continue    # go to next one if GPS altitude already present
                 except:
                     pass    # not existing or empty
             
             try:
                 self.aperture.getGoogleAltitude(photo)
-                continue
+                continue # go to next one if Google altitude already present
             except:
                 pass    # not existing or empty
             
-            # all attempts failed, fetch value from Google
+            # no other reasons to fail, do fetch value from Google
             
             count += 1
             
