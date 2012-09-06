@@ -118,6 +118,7 @@ class Application(CommonApplication):
             raise ErrorWithDescription('No changes in Flickr set content, nothing to do.')
         
         self.removePhotosFromFlickerSet()
+        
         self.addPhotosToFlickrSet()
         
         return
@@ -260,6 +261,9 @@ class Application(CommonApplication):
                 self.flickr.removePhotoFromSet(self.flickrSetId, flickrSetPhotoId)        
 
         print "done."
+
+        # The set currently has one photo
+        self.countAddedPhotos = 1
             
         return
     
