@@ -27,6 +27,9 @@ from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
 from ilg.apwf.flickr import Flickr
 
+MONTHS_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
+                'August', 'September', 'October', 'November', 'December']
+
 
 class Application(CommonApplication):
     
@@ -109,27 +112,18 @@ class Application(CommonApplication):
             
     def createFlickrSet(self):
         
-        # suggest a default set name (based on my project/album naming convention)
-        try:
-            photo = self.selectedPhoto
-            parent = photo.parent.get()
-            
-            albumName = parent.name.get()
-            project = self.aperture.getMasterProject(photo)
-            projectName = project.name.get()
-        
-            defaultName = '{0} ({1})'.format(projectName.split(' - ')[1], 
-                                             albumName.split(' - ')[1])
-            
-            # TODO: add first-last dates
-        except:
-            defaultName = None
+        defaultName = self.suggestFlickrSetName()
         
         prompt = 'Enter the new set name: '
         if defaultName != None:
             prompt += '[{0}] '.format(defaultName)
-            
-        setName = raw_input(prompt)
+        
+        try:    
+            setName = raw_input(prompt)
+        except KeyboardInterrupt:
+            print
+            raise ErrorWithDescription('KeyboardInterrupt')
+        
         setName = setName.strip()
         if len(setName) == 0:
             if defaultName != None:
@@ -162,5 +156,57 @@ class Application(CommonApplication):
         return
     
    
-     
-    
+    def suggestFlickrSetName(self):
+        
+        # suggest a default set name (based on my project/album naming convention)
+        try:
+            photo = self.selectedPhoto
+            parent = photo.parent.get()
+            
+            albumName = parent.name.get()
+            project = self.aperture.getMasterProject(photo)
+            projectName = project.name.get()
+            defaultName = '{0} ({1})'.format(projectName.split(' - ')[1].encode('utf-8'), 
+                                             albumName.split(' - ')[1].encode('utf-8'))
+            
+            # TODO: add first-last dates
+            
+            parent = self.selectedPhoto.parent.get()
+            albumPhotos = parent.image_versions.get()
+        
+            # currently sort photos by EXIF date and name     
+            albumPhotosOrderedByDate = sorted(albumPhotos, key=lambda photo: 
+            (self.aperture.getExifImageDate(photo),self.aperture.getName(photo)))
+
+            firstDate = self.aperture.getExifImageDate(albumPhotosOrderedByDate[0]).date()
+            lastDate = self.aperture.getExifImageDate(albumPhotosOrderedByDate[-1]).date()
+            
+            datesRange = None
+            if firstDate == lastDate:
+                # same year, month, day
+                datesRange = ', {0} {1}, {2}'.format(
+                        MONTHS_NAMES[firstDate.month-1], firstDate.day, 
+                        firstDate.year)
+            elif firstDate.year == lastDate.year:
+                if firstDate.month == lastDate.month:
+                    # same year and month, different days
+                    datesRange = ', {0} {1} - {2}, {3}'.format(
+                        MONTHS_NAMES[firstDate.month-1], firstDate.day, 
+                        lastDate.day, firstDate.year)
+                else:
+                    # same year, different months and days
+                    datesRange = ', {0} {1} - {2} {3}, {4}'.format(
+                        MONTHS_NAMES[firstDate.month-1], firstDate.day, 
+                        MONTHS_NAMES[firstDate.month-1], lastDate.day, firstDate.year)
+            else:
+                # different years
+                datesRange = ', {0} {1}, {2} - {3} {4}, {5}'.format(
+                        MONTHS_NAMES[firstDate.month-1], firstDate.day, firstDate.year, 
+                        MONTHS_NAMES[firstDate.month-1], lastDate.day, lastDate.year)
+            
+            defaultName += datesRange
+            
+        except:
+            defaultName = None
+
+        return defaultName
