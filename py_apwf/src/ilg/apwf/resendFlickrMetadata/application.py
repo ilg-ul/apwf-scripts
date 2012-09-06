@@ -133,7 +133,7 @@ class Application(CommonApplication):
             print 'not published on Flickr, quitting.'
             return         
         
-        print '... all photos published on Flickr, continue.'
+        print '... all photos are published on Flickr, continue.'
         print
         
         count = 0
@@ -403,6 +403,15 @@ class Application(CommonApplication):
         
         for fullName in fullNames:
             
+            try:
+                fullName = fullName.strip()
+                # special case, when the name is unknown, it is marked with '-'
+                # and should be ignored
+                if fullName == '-':
+                    continue
+            except:
+                continue
+               
             # one tag for each full name
             tags[fullName] = 'f'
               
@@ -412,6 +421,8 @@ class Application(CommonApplication):
                 tags[name] = 'f'
                 
                 if False:
+                    # currently Flickr is smart enough to search even with
+                    # diacritics, so no need for it
                     faceNameWithoutDiacritics = self.removeDiacritics(name)
                     
                     # another fag for each name without diacritics
