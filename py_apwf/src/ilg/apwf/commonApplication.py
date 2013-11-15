@@ -594,7 +594,7 @@ class CommonApplication(object):
         albumName = parent.name.get()
         count = parent.image_versions.count()
                 
-        print "Parent album '{0}' has {1} photos.".format(albumName, count)
+        print "Parent album '{0}' has {1} photos.".format(albumName.encode('utf-8'), count)
         print
         
         self.selectedPhoto = photo

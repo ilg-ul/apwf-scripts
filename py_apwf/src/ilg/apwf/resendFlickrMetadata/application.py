@@ -382,11 +382,13 @@ class Application(CommonApplication):
             
             keywordParents = keywords[keywordName]
             if len(keywordParents) != 0:
-                for parentKeywordName in keywordParents:                    
-                    if not self.isTagExportable(parentKeywordName):
-                        break
+                for parentKeywordName in keywordParents:    
+                    parentKeywordName = parentKeywordName.strip()
+                    if len(parentKeywordName) > 0:                
+                        if not self.isTagExportable(parentKeywordName):
+                            break
                     
-                    tags[parentKeywordName] = 'p'
+                        tags[parentKeywordName] = 'p'
 
         # create tags from location names
         for key in ['CountryName', 'Province', 'City', 'Location']:
@@ -434,6 +436,9 @@ class Application(CommonApplication):
     def isTagExportable(self, tag):
         
         tag = tag.strip()
+        
+        if len(tag) == 0:
+            return False
         
         if tag[0] == '[':
                 return False

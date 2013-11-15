@@ -519,6 +519,7 @@ class Aperture():
     def getGpsReferenceAlbum(self):
         
         photos = self.aperture.albums['GPS Reference Photos'].image_versions.get()
+        
         return photos
 
 

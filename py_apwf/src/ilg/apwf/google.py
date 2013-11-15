@@ -8,7 +8,7 @@ from ilg.apwf.errorWithDescription import ErrorWithDescription
 
 class GoogleApi(object):
 
-    def __init__(self, isVerbose = False):
+    def __init__(self, isVerbose=False):
        
         self.isVerbose = isVerbose
         return
@@ -35,7 +35,7 @@ class GoogleApi(object):
         
         results = parsedJsonResponse['results']
         result = results[0]
-        elevationString =  result['elevation']
+        elevationString = result['elevation']
         
         return float(elevationString)
 
@@ -70,7 +70,10 @@ class GoogleApi(object):
         for result in results:
             address_components = result['address_components']
             for address_component in address_components:
-                acType = address_component['types'][0]
+                types = address_component['types']
+                if types == None or len(types) == 0:
+                    continue
+                acType = types[0]
                 value = unicode(address_component['long_name'])
                 if acType in jsonDict:
                     if jsonDict[acType] != value:
@@ -137,9 +140,10 @@ class GoogleApi(object):
         except:
             pass
         
-        for keyName in ['route', 'establishment', 'sublocality', 'neighborhood', 
-                        'postal_code', 'administrative_area_level_3', 
-                        'street_number']:      
+        for keyName in ['route', 'establishment', 'sublocality', 'neighborhood',
+                        'postal_town', 'postal_code', 'administrative_area_level_3',
+                        'street_number', 'train_station', 'transit_station', 
+                        'bus_station']:      
             if keyName in jsonDict:
                 if location == None:
                     location = jsonDict[keyName]

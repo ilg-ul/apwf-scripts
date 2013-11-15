@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """
 Usage:
-    python ilg.apwf.checkMissingLocationNames [options]
+    python ilg.apwf.recreateCameraDate [options]
 
 Options:
     -v, --verbose
@@ -12,26 +10,31 @@ Options:
         print this message
         
 Purpose:
-    Check the selected photos, and list those without latitude/longitude.
+    Recreate the original camera image date.
     
 """
 
 
 import getopt
 
+#from datetime import datetime
+
 from ilg.apwf.errorWithDescription import ErrorWithDescription
 from ilg.apwf.commonApplication import CommonApplication
-
-from appscript import k
 
 
 class Application(CommonApplication):
     
     def __init__(self, *argv):
-                
+        
         super(Application,self).__init__(*argv)
-
-        # application specific members
+                
+        # clear all intermediate results
+        
+        self.dateOrig = None
+        self.timeDelta = None
+        
+        self.referencePhoto = None
         
         return
     
@@ -39,7 +42,6 @@ class Application(CommonApplication):
     def usage(self):
         
         print __doc__
-        return
 
 
     def run(self):
@@ -83,53 +85,33 @@ class Application(CommonApplication):
     def process(self):
         
         print
-        print "Check the selected photos, and list those without location names."
+        print "Recreate the original camera image date."
         print
 
         self.getMultipleSelection()        
         
-        self.checkMissingLocationNames()
+        self.restoreTags()
         
         return
-            
     
-    def checkMissingLocationNames(self):
+
+    def getMultipleSelection(self):
         
-        count = 0
+        self.selectedPhotos = self.aperture.getMultipleSelection()
+        print 'Processing {0} photos.'.format(len(self.selectedPhotos))
+
+
+    def restoreTags(self):
         
-        print 'Checking photos... '
+        print 'Restoring dates... '
         for photo in self.selectedPhotos:
             
-            photoName = photo.name.get()
-            photoExifDate = self.aperture.getExifImageDate(photo)
-                  
-            crtDict = self.getGeocodingFields(photo) 
-                             
-            if crtDict['hasNone']:
-                
-                count += 1
-
-                print ("  '{0}' from '{1}' has missing".
-                       format(photoName, photoExifDate)),
-                       
-                for key in self.locationKeyNames:
-                    if crtDict[key] == None:
-                        print "{0}".format(key),
-                        
-                print
+            cameraImageDate = self.aperture.getCameraImageDate(photo)
+            self.aperture.adjustImageDate(photo, cameraImageDate)
             
-        
-        if count == 0:
-            print '... all photos have location names assigned.'
-        elif count == 1:
-            print '... 1 photo without location names assigned.'
-        else:
-            print '... {0} photos without location names assigned.'.format(count)
-             
+        print '  done'
+                    
         return
 
 
-    
-    
-        
         

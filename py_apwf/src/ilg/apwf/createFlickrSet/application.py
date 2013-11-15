@@ -202,7 +202,7 @@ class Application(CommonApplication):
                 # different years
                 datesRange = ', {0} {1}, {2} - {3} {4}, {5}'.format(
                         MONTHS_NAMES[firstDate.month-1], firstDate.day, firstDate.year, 
-                        MONTHS_NAMES[firstDate.month-1], lastDate.day, lastDate.year)
+                        MONTHS_NAMES[lastDate.month-1], lastDate.day, lastDate.year)
             
             defaultName += datesRange
             

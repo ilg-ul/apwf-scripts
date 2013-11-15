@@ -126,6 +126,7 @@ class Application(CommonApplication):
         fileName = raw_input('Enter GPX file name: ')
         fileName = fileName.strip()
         fileName = fileName.replace('\\','')
+        fileName = fileName.encode('utf-8')
         
         try:
             f = open(fileName)
@@ -144,7 +145,7 @@ class Application(CommonApplication):
         self.gpxTracks = th.getResult()
         tracks = self.gpxTracks.getTracks()
         for track in tracks:
-            name = track.getName()
+            name = track.getName().encode('utf-8')
             points = track.getPoints()
             count = len(points)
             firstPointTimestamp = points[0].timestamp

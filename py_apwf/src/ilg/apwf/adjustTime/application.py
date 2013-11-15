@@ -3,6 +3,9 @@ Usage:
     python ilg.apwf.adjustTime [options]
 
 Options:
+    -n, --dry
+        dry run, do not add/update tags
+
     -v, --verbose
         print progress output
 
@@ -358,8 +361,12 @@ class Application(CommonApplication):
                 if gpsAfterPhoto == None or photoDate < gpsAfterPhotoDate:
                     gpsAfterPhoto = photo
                     gpsAfterPhotoDate = photoDate
-                
-        print "  reference before: '{0}'".format(gpsBeforePhoto.name.get())
+           
+        if gpsBeforePhoto == None:
+            raise ErrorWithDescription('No reference before, cancelling.')
+        else:
+            print "  reference before: '{0}'".format(gpsBeforePhoto.name.get())
+            
         if gpsAfterPhoto != None:
             print "  reference after: '{0}'".format(gpsAfterPhoto.name.get())
         else:
