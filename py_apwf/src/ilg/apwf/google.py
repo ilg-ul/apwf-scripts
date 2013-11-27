@@ -42,7 +42,7 @@ class GoogleApi(object):
 
     def isStreetNumberFirst(self, countryCode):
         
-        if countryCode in ['USA', 'GBR', 'NZL']:
+        if countryCode in ['USA', 'GBR', 'AUS', 'NZL']:
             return True
         
         return False
