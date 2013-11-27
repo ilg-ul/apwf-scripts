@@ -39,6 +39,14 @@ class GoogleApi(object):
         
         return float(elevationString)
 
+
+    def isStreetNumberFirst(self, countryCode):
+        
+        if countryCode in ['USA', 'GBR', 'NZL']:
+            return True
+        
+        return False
+        
     
     # The Google Geocoding API
     # https://developers.google.com/maps/documentation/geocoding/
@@ -132,18 +140,43 @@ class GoogleApi(object):
         resultDict['City'] = city
 
         
-        location = None
-
         try:
             if jsonDict['route'] == jsonDict['neighborhood']:
                 del jsonDict['route']
         except:
             pass
         
-        for keyName in ['route', 'establishment', 'sublocality', 'neighborhood',
-                        'postal_town', 'postal_code', 'administrative_area_level_3',
-                        'street_number', 'train_station', 'transit_station', 
-                        'bus_station']:      
+        location = None
+
+
+        streetNumber = ''
+        for keyName in [ 'street_number']:      
+            if keyName in jsonDict:
+                streetNumber = jsonDict[keyName]
+      
+                del jsonDict[keyName]
+
+        streetName = ''
+        for keyName in ['route']:      
+            if keyName in jsonDict:
+                streetName = jsonDict[keyName]
+      
+                del jsonDict[keyName]
+        
+        if self.isStreetNumberFirst(resultDict['CountryCode']):
+            streetFull = streetNumber + ' ' + streetName
+        else:
+            streetFull = streetName + ' ' + streetNumber
+            
+        streetFull = streetFull.strip()
+        
+        if len(streetFull) > 0:
+            location = streetFull
+            
+        for keyName in [ 'postal_town', 'postal_code',
+                         'administrative_area_level_3', 'sublocality',  
+                         'neighborhood', 'establishment',                         
+                         'train_station', 'transit_station', 'bus_station']:      
             if keyName in jsonDict:
                 if location == None:
                     location = jsonDict[keyName]
