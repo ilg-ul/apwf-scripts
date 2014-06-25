@@ -189,7 +189,7 @@ class GoogleApi(object):
         resultDict['Location'] = location
 
         # remove uninteresting data
-        for keyName in []:      
+        for keyName in ['political']:      
             if keyName in jsonDict:
                 del jsonDict[keyName]
         
