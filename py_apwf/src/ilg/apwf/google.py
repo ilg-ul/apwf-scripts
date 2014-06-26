@@ -173,9 +173,9 @@ class GoogleApi(object):
         if len(streetFull) > 0:
             location = streetFull
             
-        for keyName in [ 'postal_town', 'postal_code',
+        for keyName in [ 'postal_town', 'neighborhood', 'political', 'postal_code',
                          'administrative_area_level_3', 'sublocality',  
-                         'neighborhood', 'establishment',                         
+                          'establishment',                         
                          'train_station', 'transit_station', 'bus_station']:      
             if keyName in jsonDict:
                 if location == None:
@@ -189,12 +189,12 @@ class GoogleApi(object):
         resultDict['Location'] = location
 
         # remove uninteresting data
-        for keyName in ['political']:      
+        for keyName in []:      
             if keyName in jsonDict:
                 del jsonDict[keyName]
         
         if len(jsonDict) > 0:
-            raise ErrorWithDescription('Unprocessed geocoding data: {0}'.format(jsonDict))
+            print 'Unprocessed geocoding data: {0}'.format(jsonDict)
         
         return resultDict
     
