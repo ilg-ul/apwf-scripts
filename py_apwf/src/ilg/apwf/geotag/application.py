@@ -145,7 +145,10 @@ class Application(CommonApplication):
         self.gpxTracks = th.getResult()
         tracks = self.gpxTracks.getTracks()
         for track in tracks:
-            name = track.getName().encode('utf-8')
+            if track.getName() != None:
+                name = track.getName().encode('utf-8')
+            else:
+                name = '(unnamed)'
             points = track.getPoints()
             count = len(points)
             firstPointTimestamp = points[0].timestamp
