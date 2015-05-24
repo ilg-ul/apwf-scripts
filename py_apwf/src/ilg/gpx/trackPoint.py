@@ -44,7 +44,13 @@ class TrackPoint(object):
     def _convertStringToDate(self, timestampString):
     
         try:
-            timestamp = datetime.strptime(timestampString, '%Y-%m-%dT%H:%M:%SZ')        
+            if timestampString.find('.') != -1:
+                # 2D coordinates have 3 digit millisecond,
+                # extend to microsecond to use %f
+                tmp = timestampString.split('Z') # get rid of Z
+                timestamp = datetime.strptime(tmp[0]+'000Z', '%Y-%m-%dT%H:%M:%S.%fZ')  
+            else:      
+                timestamp = datetime.strptime(timestampString, '%Y-%m-%dT%H:%M:%SZ')        
             timestampWithTz = self.tzUtc.localize(timestamp)
         except ValueError as err:
             print err
