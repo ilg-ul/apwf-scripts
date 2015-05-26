@@ -166,8 +166,11 @@ class Application(CommonApplication):
             albumName = parent.name.get()
             project = self.aperture.getMasterProject(photo)
             projectName = project.name.get()
-            defaultName = '{0} ({1})'.format(projectName.split(' - ')[1].encode('utf-8'), 
-                                             albumName.split(' - ')[1].encode('utf-8'))
+            setName = projectName.split(' - ')[1]
+            setName = setName[:1].upper() + setName[1:]
+            setRating = albumName.split(' - ')[1]
+            defaultName = '{0} ({1})'.format(setName.encode('utf-8'), 
+                                             setRating.encode('utf-8'))
             
             # TODO: add first-last dates
             
@@ -197,7 +200,7 @@ class Application(CommonApplication):
                     # same year, different months and days
                     datesRange = ', {0} {1} - {2} {3}, {4}'.format(
                         MONTHS_NAMES[firstDate.month-1], firstDate.day, 
-                        MONTHS_NAMES[firstDate.month-1], lastDate.day, firstDate.year)
+                        MONTHS_NAMES[lastDate.month-1], lastDate.day, firstDate.year)
             else:
                 # different years
                 datesRange = ', {0} {1}, {2} - {3} {4}, {5}'.format(
