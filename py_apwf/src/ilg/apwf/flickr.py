@@ -40,12 +40,12 @@ class Flickr():
 
     def parseJsonResponse(self, response):
         
-        prefix = 'jsonFlickrApi('
-        sufix = ')'
-        if not response.startswith(prefix) or not response.endswith(sufix):
-            return None
+        # prefix = 'jsonFlickrApi('
+        # sufix = ')'
+        # if not response.startswith(prefix) or not response.endswith(sufix):
+        #     return None
         
-        response = response[len(prefix):-len(sufix)]
+        # response = response[len(prefix):-len(sufix)]
         parsedJson = json.loads(response)
 
         if parsedJson['stat'] == 'fail':
@@ -59,7 +59,8 @@ class Flickr():
         response = self.flickrapi.photos_setMeta(photo_id=photoIdString, 
                     title=titleString, description=descriptionString)
         
-        if response == 'jsonFlickrApi({"stat":"ok"})':        
+        parsedJson = json.loads(response)
+        if parsedJson['stat'] == 'ok':
             return True
         else:
             return False
@@ -71,7 +72,8 @@ class Flickr():
         response = self.flickrapi.photos_setTags(photo_id=photoIdString, 
                                                  tags=tagsString)
 
-        if response == 'jsonFlickrApi({"stat":"ok"})':        
+        parsedJson = json.loads(response)
+        if parsedJson['stat'] == 'ok':
             return True
         else:
             return False
