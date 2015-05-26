@@ -146,10 +146,10 @@ class Application(CommonApplication):
 
             flickrIdString = self.aperture.getFlickrID(photo)
 
-            print ("  '{0}' from '{1}'".
-                       format(photoName, photoExifDate)),
-                       
             count += 1
+            print ("  {2:04d} '{0}' from '{1}'".
+                       format(photoName, photoExifDate, count)),
+                       
             
             if not self.doOverwrite:    
                 try:
@@ -374,7 +374,7 @@ class Application(CommonApplication):
         tags = {}
         
         # first add current tags, with their parents, up to the first
-        # tag not containing lower case letters
+        # tag in parenthesis
         keywords = self.aperture.getKeywords(photo)
         for keywordName in keywords.keys():
             
@@ -384,7 +384,11 @@ class Application(CommonApplication):
             if len(keywordParents) != 0:
                 for parentKeywordName in keywordParents:    
                     parentKeywordName = parentKeywordName.strip()
+                    
                     if len(parentKeywordName) > 0:                
+                        if parentKeywordName[0] == '[' and parentKeywordName[-1] == ']':
+                            break
+                        
                         if not self.isTagExportable(parentKeywordName):
                             break
                     
